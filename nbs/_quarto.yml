@@ -33,31 +33,42 @@ website:
       - text: "Blog"
         href: https://bthek1.github.io/B_Blog/
 
-      - text: "AI"
+      - text: "Deep Learning"
         menu:
-        - text: "Computer Setup"
-          href: https://bthek1.github.io/Computer_Setup/
         - text: "Fast AI course"
           href: https://bthek1.github.io/FastAI_course/
         - text: "DL Methods"
           href: https://bthek1.github.io/DL_methods/
+        - text: "Research"
+          href: https://bthek1.github.io/Research/
           
-      - text: "ML"
+      - text: "ML Techniques"
         menu:
         - text: "ML Methods"
           href: https://bthek1.github.io/ML_methods/
-        - text: "Python Libraries"
-          href: https://bthek1.github.io/Python_Libs/
         - text: "Time series"
           href: https://bthek1.github.io/TimeSeriesML/
 
           
       - text: "Web Development"
         href: https://bthek1.github.io/WEB_doc/
-          
-      - text: "Nbdev Automation"
-        href: https://bthek1.github.io/nbdevAuto/
-          
+
+      - text: "Tools"
+        menu:
+        - text: "Computer Setup"
+          href: https://bthek1.github.io/Computer_Setup/
+        - text: "Python Libraries"
+          href: https://bthek1.github.io/Python_Libs/
+        - text: "Nbdev Automation"
+          href: https://bthek1.github.io/nbdevAuto/    
+
+      - text: "Business"
+        menu:
+        - text: "Business Doc"
+          href: https://bthek1.github.io/Business_doc/
+        - text: "Ideas Doc"
+          href: https://bthek1.github.io/Philosophy_doc/
+
       - text: "Help"
         menu:
           - text: "Report a Bug"
@@ -105,5 +116,17 @@ website:
         
   sidebar:
     style: floating
+    contents: 
+      - "index.ipynb"
+      - auto: "0*.ipynb"
+      - auto: "1*.ipynb"
+      - auto: "2*.ipynb"
+      - auto: "3*.ipynb"
+      - auto: "4*.ipynb"
+      - auto: "5*.ipynb"
+      - auto: "6*.ipynb"
+      - auto: "7*.ipynb"
+      - auto: "8*.ipynb"
+      - auto: "9*.ipynb"
 
-metadata-files: [nbdev.yml, sidebar.yml]
+metadata-files: [nbdev.yml]
