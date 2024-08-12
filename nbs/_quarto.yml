@@ -118,15 +118,7 @@ website:
     style: floating
     contents: 
       - "index.ipynb"
-      - auto: "0*.ipynb"
-      - auto: "1*.ipynb"
-      - auto: "2*.ipynb"
-      - auto: "3*.ipynb"
-      - auto: "4*.ipynb"
-      - auto: "5*.ipynb"
-      - auto: "6*.ipynb"
-      - auto: "7*.ipynb"
-      - auto: "8*.ipynb"
-      - auto: "9*.ipynb"
+      - auto: "[0-9]*.ipynb"
+
 
 metadata-files: [nbdev.yml]
