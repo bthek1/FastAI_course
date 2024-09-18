@@ -1,0 +1,124 @@
+project:
+  type: website
+
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    css: styles.css
+    toc: true
+    
+website:
+  title: "Benedict Thekkel"
+  image: "Logo.svg"
+  favicon: "favi.svg"
+  reader-mode: true
+  back-to-top-navigation: true
+  page-navigation: true
+  twitter-card: true
+  open-graph: true
+  repo-actions: [edit, issue]
+  search:
+    location: navbar
+    type: overlay
+
+  navbar:
+    background: dark
+    logo: "Logo.svg"
+    logo-alt: "Quarto logo."
+    collapse-below: lg
+    title: false
+    left:
+      - text: "Blog"
+        href: https://bthek1.github.io/B_Blog/
+
+      - text: "Deep Learning"
+        menu:
+        - text: "Fast AI course"
+          href: https://bthek1.github.io/FastAI_course/
+        - text: "DL Methods"
+          href: https://bthek1.github.io/DL_methods/
+        - text: "Research"
+          href: https://bthek1.github.io/Research/
+          
+      - text: "ML Techniques"
+        menu:
+        - text: "ML Methods"
+          href: https://bthek1.github.io/ML_methods/
+        - text: "Time series"
+          href: https://bthek1.github.io/TimeSeriesML/
+
+          
+      - text: "Web Development"
+        href: https://bthek1.github.io/WEB_doc/
+
+      - text: "Tools"
+        menu:
+        - text: "Computer Setup"
+          href: https://bthek1.github.io/Computer_Setup/
+        - text: "Python Libraries"
+          href: https://bthek1.github.io/Python_Libs/
+        - text: "Nbdev Automation"
+          href: https://bthek1.github.io/nbdevAuto/    
+
+      - text: "Business"
+        menu:
+        - text: "Business Doc"
+          href: https://bthek1.github.io/Business_doc/
+        - text: "Ideas Doc"
+          href: https://bthek1.github.io/Philosophy_doc/
+
+      - text: "Help"
+        menu:
+          - text: "Report a Bug"
+            icon: "bug"
+            href: "https://github.com/bthek1/B_Blog/issues"
+          - text: "Ask a Question"
+            icon: "chat-right-text"
+            href: "https://github.com/bthek1/B_Blog/issues"
+          - text: "FAQ"
+            icon: "question-circle"
+            href: "https://github.com/bthek1/B_Blog/issues"
+          
+    tools:
+      - icon: github
+        href: "https://github.com/bthek1"
+        aria-label: Github
+      - icon: linkedin
+        href: "https://www.linkedin.com/in/benedict-thekkel/"
+        aria-label: Linkedin
+
+
+  page-footer:
+    center:
+      - text: "About"
+        href: "index.ipynb"
+      - text: "FAQ"
+        href: "https://github.com/bthek1/B_Blog/issues"    
+      - text: "License"
+        href: "https://bthek1.github.io/benedicts_blog/Index.html"
+      - text: "Trademark"
+        href: "index.ipynb"
+        
+        
+    right:
+      - icon: github
+        href: "https://github.com/bthek1"
+        aria-label: Github
+      - icon: linkedin
+        href: "https://www.linkedin.com/in/benedict-thekkel/"
+        aria-label: Linkedin
+
+  comments: 
+    utterances:
+      repo: quarto-dev/quarto-web
+        
+  sidebar:
+    style: floating
+    contents: 
+      - "index.ipynb"
+      - auto: "[0-9]*.ipynb"
+
+
+metadata-files: [nbdev.yml]

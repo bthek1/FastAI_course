@@ -1,0 +1,16 @@
+{
+  "id": "Benson Thekkel/060_Kaggle_tut",
+  "title": "060_Kaggle_tut1",
+  "code_file": "060_Kaggle_tut.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": false,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "keywords": [],
+  "dataset_sources": [],
+  "kernel_sources": [],
+  "competition_sources": [
+    "competitions/paddy-disease-classification"
+  ]
+}

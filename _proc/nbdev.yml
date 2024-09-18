@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "fastAIcourse"
+  site-url: "https://bthek1.github.io/fastAIcourse"
+  description: "fastAIcourse"
+  repo-branch: main
+  repo-url: "https://github.com/bthek1/fastAIcourse"

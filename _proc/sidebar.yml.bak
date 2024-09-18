@@ -1,0 +1,26 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - 000_Intro.ipynb
+      - 010_Deployment.ipynb
+      - 020_NeuralNet.ipynb
+      - 021_how-does-a-neural-net-really-work.ipynb
+      - 030_NaturalLanguage.ipynb
+      - 041_linear-model-and-neural-net-from-scratch.ipynb
+      - 042_why-you-should-use-a-framework.ipynb
+      - 050_how-random-forests-really-work.ipynb
+      - 060_Kaggle_tut.ipynb
+      - 061_multi-target.ipynb
+      - 070_collaborative-filtering-deep-dive.ipynb
+      - 080_tabular.ipynb
+      - 100_lm-hackers.ipynb
+      - 110_Stable_Diffusion_overview.ipynb
+      - 111_Stable_Diffusion.ipynb
+      - 112_Stable Diffusion Deep Dive.ipynb
+      - 120_Matrix.ipynb
+      - 130_Backpropagation.ipynb
+      - 140_minibatch_training.ipynb
+      - 150_datasets.ipynb
+      - 160_foundations.ipynb
+      - 170_convolutions.ipynb
