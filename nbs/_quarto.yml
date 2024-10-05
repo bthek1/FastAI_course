@@ -48,11 +48,16 @@ website:
           href: https://bthek1.github.io/ML_methods/
         - text: "Time series"
           href: https://bthek1.github.io/TimeSeriesML/
-
+ 
+      - text: "Web"
+        menu:
+        - text: "Web Development"
+          href: https://bthek1.github.io/Computer_Setup/
+        - text: "Front End"
+          href: https://bthek1.github.io/Front_End/
+        - text: "Back End"
+          href: https://bthek1.github.io/Back_End/
           
-      - text: "Web Development"
-        href: https://bthek1.github.io/WEB_doc/
-
       - text: "Tools"
         menu:
         - text: "Computer Setup"
