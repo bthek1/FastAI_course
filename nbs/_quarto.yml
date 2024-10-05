@@ -60,12 +60,14 @@ website:
           
       - text: "Tools"
         menu:
-        - text: "Computer Setup"
-          href: https://bthek1.github.io/Computer_Setup/
+        - text: "Software Tools"
+          href: https://bthek1.github.io/Software_Tools/ 
         - text: "Python Libraries"
           href: https://bthek1.github.io/Python_Libs/
         - text: "Nbdev Automation"
-          href: https://bthek1.github.io/nbdevAuto/    
+          href: https://bthek1.github.io/nbdevAuto/
+        - text: "Computer Setup"
+          href: https://bthek1.github.io/Computer_Setup/
 
       - text: "Business"
         menu:
