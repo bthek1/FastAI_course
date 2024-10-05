@@ -52,7 +52,7 @@ website:
       - text: "Web"
         menu:
         - text: "Web Development"
-          href: https://bthek1.github.io/Computer_Setup/
+          href: https://bthek1.github.io/WEB_doc/
         - text: "Front End"
           href: https://bthek1.github.io/Front_End/
         - text: "Back End"
