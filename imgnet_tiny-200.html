@@ -1,0 +1,3921 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.39">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Benedict Thekkel">
+
+<title>Tiny Imagenet – fastAIcourse</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./superres.html" rel="next">
+<link href="./imgnet_tiny-wide.html" rel="prev">
+<link href="./favi.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-d166b450ba5a8e9f7a0ab969bf6592c1.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-8591a23a4523c05244f862a3a7a9199d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-e70fbee34635c599973ad3990d9ce4ab.min.css" rel="prefetch" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="Tiny Imagenet – fastAIcourse">
+<meta property="og:image" content="https://bthek1.github.io/fastAIcourse/343_imgnet_tiny-200_files/figure-html/cell-33-output-1.png">
+<meta property="og:site_name" content="fastAIcourse">
+<meta property="og:image:height" content="418">
+<meta property="og:image:width" content="420">
+<meta name="twitter:title" content="Tiny Imagenet – fastAIcourse">
+<meta name="twitter:image" content="https://bthek1.github.io/fastAIcourse/343_imgnet_tiny-200_files/figure-html/cell-33-output-1.png">
+<meta name="twitter:image-height" content="418">
+<meta name="twitter:image-width" content="420">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    <img src="./Logo.svg" alt="Quarto logo." class="navbar-logo">
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-deep-learning" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Deep Learning</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-deep-learning">    
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/FastAI_course/">
+ <span class="dropdown-text">Fast AI course</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/DL_methods/">
+ <span class="dropdown-text">DL Methods</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/Research/">
+ <span class="dropdown-text">Research</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-ml-techniques" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">ML Techniques</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-ml-techniques">    
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/ML_methods/">
+ <span class="dropdown-text">ML Methods</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/TimeSeriesML/">
+ <span class="dropdown-text">Time series</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-web" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Web</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-web">    
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/WEB_doc/">
+ <span class="dropdown-text">Web Development</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/Front_End/">
+ <span class="dropdown-text">Front End</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/Back_End/">
+ <span class="dropdown-text">Back End</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/Docker_Containers/">
+ <span class="dropdown-text">Docker Containers</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-tools" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Tools</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-tools">    
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/Software_Tools/">
+ <span class="dropdown-text">Software Tools</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/Hardware_Tools/">
+ <span class="dropdown-text">Hardware Tools</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/Python_Libs/">
+ <span class="dropdown-text">Python Libraries</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/nbdevAuto/">
+ <span class="dropdown-text">Nbdev Automation</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-business" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Business</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-business">    
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/Business_doc/">
+ <span class="dropdown-text">Business Doc</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/Philosophy_doc/">
+ <span class="dropdown-text">Ideas Doc</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/Finances/">
+ <span class="dropdown-text">Finances</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://bthek1.github.io/Other/">
+ <span class="dropdown-text">Other</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="https://bthek1.github.io/B_Blog/"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-help" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Help</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-help">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/bthek1/B_Blog/issues"><i class="bi bi-bug" role="img">
+</i> 
+ <span class="dropdown-text">Report a Bug</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/bthek1/B_Blog/issues"><i class="bi bi-chat-right-text" role="img">
+</i> 
+ <span class="dropdown-text">Ask a Question</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/bthek1/B_Blog/issues"><i class="bi bi-question-circle" role="img">
+</i> 
+ <span class="dropdown-text">FAQ</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools tools-wide">
+    <a href="https://github.com/bthek1" title="" class="quarto-navigation-tool px-1" aria-label="Github"><i class="bi bi-github"></i></a>
+    <a href="https://www.linkedin.com/in/benedict-thekkel/" title="" class="quarto-navigation-tool px-1" aria-label="Linkedin"><i class="bi bi-linkedin"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./imgnet_tiny-200.html">Tiny Imagenet</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><a href="https://bthek1.github.io/fastAIcourse/">Fast AI Course</a></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting Started</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./deployment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deployment</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./neuralnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Neural Net Foundations</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./how-does-a-neural-net-really-work.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">NeuralNet Deep dive</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./naturallanguage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">NLP - Natural Language Processing</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./linear-model-and-neural-net-from-scratch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linear model and Neural Net from scratch</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./why-you-should-use-a-framework.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Why you should use a framework</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./how-random-forests-really-work.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How random forests really work</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./kaggle_tut.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kaggle tutorial</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./multi-target.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mulit target Example</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./collaborative-filtering-deep-dive.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Collaborative Filtering</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tabular.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tabular Modeling Deep Dive</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lm-hackers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">A hacker’s guide to Language Models</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./stable_diffusion_overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stable Diffusion Overview</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./stable_diffusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stable Diffusion with 🤗 Diffusers</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./stable diffusion deep dive.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stable Diffusion Deep Dive</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./matrix.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Matrix and tensor</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./backpropagation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Backpropagation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./minibatch_training.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mini Batch</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hugging Face Datasets</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Foundations</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./convolutions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Convolutions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./learner.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Learner</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./activations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Activation stats</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./initializing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Initialization</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./accel_sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Accelerated SGD</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./resnet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ResNets</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./augment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Augmentation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ddpm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Denoising Diffusion Probabilistic Models with miniai</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./styletransfer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./nca.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Setup 2</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ddpm_v2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Denoising Diffusion Probabilistic Models with miniai</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./fid.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FID</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ddpm_v3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Denoising Diffusion Probabilistic Models with miniai</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ddim.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Denoising Diffusion Implicit Models - DDIM</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cifar10_and_wandb.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CIFAR 10 image classifications</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cosine.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">cosine schedule</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./noise-pred.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Predicting the noise level of noisy FashionMNIST images</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./karras.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Karras pre-conditioning</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./imgnet_tiny.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tiny Imagenet</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./imgnet_tiny-widish.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tiny Imagenet</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./imgnet_tiny-wide.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tiny Imagenet</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./imgnet_tiny-200.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Tiny Imagenet</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./superres.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tiny Imagenet</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffusion_unet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Diffusion unet</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./attention.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Attention</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffusion-attn-cond.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Diffusion unet</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#data-processing" id="toc-data-processing" class="nav-link active" data-scroll-target="#data-processing">Data processing</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.dev/bthek1/fastAIcourse/blob/main/343_imgnet_tiny-200.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bthek1/fastAIcourse/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Tiny Imagenet</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Benedict Thekkel </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<div id="cell-2" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">'CUDA_VISIBLE_DEVICES'</span>]<span class="op">=</span><span class="st">'1'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-3" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> shutil,timm,os,torch,random,datasets,math</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> fastcore.<span class="bu">all</span> <span class="im">as</span> fc, numpy <span class="im">as</span> np, matplotlib <span class="im">as</span> mpl, matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> k_diffusion <span class="im">as</span> K, torchvision.transforms <span class="im">as</span> T</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torchvision.transforms.functional <span class="im">as</span> TF,torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader,default_collate</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.nn <span class="im">import</span> init</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastcore.foundation <span class="im">import</span> L</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch <span class="im">import</span> nn,tensor</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> operator <span class="im">import</span> itemgetter</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torcheval.metrics <span class="im">import</span> MulticlassAccuracy</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> partial</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.optim <span class="im">import</span> lr_scheduler</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch <span class="im">import</span> optim</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision.io <span class="im">import</span> read_image,ImageReadMode</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> glob <span class="im">import</span> glob</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastAIcourse.datasets <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastAIcourse.conv <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastAIcourse.learner <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastAIcourse.activations <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastAIcourse.init <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastAIcourse.sgd <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastAIcourse.resnet <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastAIcourse.augment <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastAIcourse.accel <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastAIcourse.training <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-4" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastprogress <span class="im">import</span> progress_bar</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-5" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>torch.set_printoptions(precision<span class="op">=</span><span class="dv">5</span>, linewidth<span class="op">=</span><span class="dv">140</span>, sci_mode<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">1</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>mpl.rcParams[<span class="st">'figure.dpi'</span>] <span class="op">=</span> <span class="dv">70</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>set_seed(<span class="dv">42</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> fc.defaults.cpus<span class="op">&gt;</span><span class="dv">8</span>: fc.defaults.cpus<span class="op">=</span><span class="dv">8</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="data-processing" class="level2">
+<h2 class="anchored" data-anchor-id="data-processing">Data processing</h2>
+<div id="cell-7" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>path_data <span class="op">=</span> Path(<span class="st">'data'</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>path_data.mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> path_data<span class="op">/</span><span class="st">'tiny-imagenet-200'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-8" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">'http://cs231n.stanford.edu/tiny-imagenet-200.zip'</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> path.exists():</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    path_zip <span class="op">=</span> fc.urlsave(url, path_data)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    shutil.unpack_archive(<span class="st">'data/tiny-imagenet-200.zip'</span>, <span class="st">'data'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-9" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>bs <span class="op">=</span> <span class="dv">512</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-10" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TinyDS:</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, path):</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.path <span class="op">=</span> Path(path)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.files <span class="op">=</span> glob(<span class="bu">str</span>(path<span class="op">/</span><span class="st">'**/*.JPEG'</span>), recursive<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>): <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.files)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, i): <span class="cf">return</span> <span class="va">self</span>.files[i],Path(<span class="va">self</span>.files[i]).parent.parent.name</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-11" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>tds <span class="op">=</span> TinyDS(path<span class="op">/</span><span class="st">'train'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-12" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>path_anno <span class="op">=</span> path<span class="op">/</span><span class="st">'val'</span><span class="op">/</span><span class="st">'val_annotations.txt'</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>anno <span class="op">=</span> <span class="bu">dict</span>(o.split(<span class="st">'</span><span class="ch">\t</span><span class="st">'</span>)[:<span class="dv">2</span>] <span class="cf">for</span> o <span class="kw">in</span> path_anno.read_text().splitlines())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-13" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TinyValDS(TinyDS):</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, i): <span class="cf">return</span> <span class="va">self</span>.files[i],anno[os.path.basename(<span class="va">self</span>.files[i])]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-14" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>vds <span class="op">=</span> TinyValDS(path<span class="op">/</span><span class="st">'val'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-15" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TfmDS:</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, ds, tfmx<span class="op">=</span>fc.noop, tfmy<span class="op">=</span>fc.noop): <span class="va">self</span>.ds,<span class="va">self</span>.tfmx,<span class="va">self</span>.tfmy <span class="op">=</span> ds,tfmx,tfmy</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>): <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.ds)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, i):</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        x,y <span class="op">=</span> <span class="va">self</span>.ds[i]</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.tfmx(x),<span class="va">self</span>.tfmy(y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-16" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>id2str <span class="op">=</span> (path<span class="op">/</span><span class="st">'wnids.txt'</span>).read_text().splitlines()</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>str2id <span class="op">=</span> {v:k <span class="cf">for</span> k,v <span class="kw">in</span> <span class="bu">enumerate</span>(id2str)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-17" class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>xmean,xstd <span class="op">=</span> (tensor([<span class="fl">0.47565</span>, <span class="fl">0.40303</span>, <span class="fl">0.31555</span>]), tensor([<span class="fl">0.28858</span>, <span class="fl">0.24402</span>, <span class="fl">0.26615</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-18" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tfmy(y): <span class="cf">return</span> tensor(str2id[y])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-19" class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> denorm(x): <span class="cf">return</span> (x<span class="op">*</span>xstd[:,<span class="va">None</span>,<span class="va">None</span>]<span class="op">+</span>xmean[:,<span class="va">None</span>,<span class="va">None</span>]).clip(<span class="dv">0</span>,<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-20" class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>all_synsets <span class="op">=</span> [o.split(<span class="st">'</span><span class="ch">\t</span><span class="st">'</span>) <span class="cf">for</span> o <span class="kw">in</span> (path<span class="op">/</span><span class="st">'words.txt'</span>).read_text().splitlines()]</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>synsets <span class="op">=</span> {k:v.split(<span class="st">','</span>, maxsplit<span class="op">=</span><span class="dv">1</span>)[<span class="dv">0</span>] <span class="cf">for</span> k,v <span class="kw">in</span> all_synsets <span class="cf">if</span> k <span class="kw">in</span> id2str}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-21" class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tfm_batch(b, tfm_x<span class="op">=</span>fc.noop, tfm_y <span class="op">=</span> fc.noop): <span class="cf">return</span> tfm_x(b[<span class="dv">0</span>]),tfm_y(b[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-22" class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>act_gr <span class="op">=</span> partial(GeneralRelu, leak<span class="op">=</span><span class="fl">0.1</span>, sub<span class="op">=</span><span class="fl">0.4</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>iw <span class="op">=</span> partial(init_weights, leaky<span class="op">=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-23" class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>nfs <span class="op">=</span> (<span class="dv">32</span>,<span class="dv">64</span>,<span class="dv">128</span>,<span class="dv">256</span>,<span class="dv">512</span>,<span class="dv">1024</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-24" class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>opt_func <span class="op">=</span> partial(optim.AdamW, eps<span class="op">=</span><span class="fl">1e-5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-25" class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>nbks<span class="op">=</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-26" class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> conv(ni, nf, ks<span class="op">=</span><span class="dv">3</span>, stride<span class="op">=</span><span class="dv">1</span>, act<span class="op">=</span>nn.ReLU, norm<span class="op">=</span><span class="va">None</span>, bias<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    layers <span class="op">=</span> []</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> norm: layers.append(norm(ni))</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> act : layers.append(act())</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    layers.append(nn.Conv2d(ni, nf, stride<span class="op">=</span>stride, kernel_size<span class="op">=</span>ks, padding<span class="op">=</span>ks<span class="op">//</span><span class="dv">2</span>, bias<span class="op">=</span>bias))</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> nn.Sequential(<span class="op">*</span>layers)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _conv_block(ni, nf, stride, act<span class="op">=</span>act_gr, norm<span class="op">=</span><span class="va">None</span>, ks<span class="op">=</span><span class="dv">3</span>):</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> nn.Sequential(conv(ni, nf, stride<span class="op">=</span><span class="dv">1</span>     , act<span class="op">=</span>act, norm<span class="op">=</span>norm, ks<span class="op">=</span>ks),</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>                         conv(nf, nf, stride<span class="op">=</span>stride, act<span class="op">=</span>act, norm<span class="op">=</span>norm, ks<span class="op">=</span>ks))</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ResBlock(nn.Module):</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, ni, nf, stride<span class="op">=</span><span class="dv">1</span>, ks<span class="op">=</span><span class="dv">3</span>, act<span class="op">=</span>act_gr, norm<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.convs <span class="op">=</span> _conv_block(ni, nf, stride, act<span class="op">=</span>act, ks<span class="op">=</span>ks, norm<span class="op">=</span>norm)</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.idconv <span class="op">=</span> fc.noop <span class="cf">if</span> ni<span class="op">==</span>nf <span class="cf">else</span> conv(ni, nf, ks<span class="op">=</span><span class="dv">1</span>, stride<span class="op">=</span><span class="dv">1</span>, act<span class="op">=</span><span class="va">None</span>, norm<span class="op">=</span>norm)</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pool <span class="op">=</span> fc.noop <span class="cf">if</span> stride<span class="op">==</span><span class="dv">1</span> <span class="cf">else</span> nn.AvgPool2d(<span class="dv">2</span>, ceil_mode<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x): <span class="cf">return</span> <span class="va">self</span>.convs(x) <span class="op">+</span> <span class="va">self</span>.idconv(<span class="va">self</span>.pool(x))</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> res_blocks(n_bk, ni, nf, stride<span class="op">=</span><span class="dv">1</span>, ks<span class="op">=</span><span class="dv">3</span>, act<span class="op">=</span>act_gr, norm<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> nn.Sequential(<span class="op">*</span>[</span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>        ResBlock(ni <span class="cf">if</span> i<span class="op">==</span><span class="dv">0</span> <span class="cf">else</span> nf, nf, stride<span class="op">=</span>stride <span class="cf">if</span> i<span class="op">==</span>n_bk<span class="op">-</span><span class="dv">1</span> <span class="cf">else</span> <span class="dv">1</span>, ks<span class="op">=</span>ks, act<span class="op">=</span>act, norm<span class="op">=</span>norm)</span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_bk)])</span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_dropmodel(act<span class="op">=</span>act_gr, nfs<span class="op">=</span>nfs, nbks<span class="op">=</span>nbks, norm<span class="op">=</span>nn.BatchNorm2d, drop<span class="op">=</span><span class="fl">0.2</span>):</span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>    layers <span class="op">=</span> [nn.Conv2d(<span class="dv">3</span>, nfs[<span class="dv">0</span>], <span class="dv">5</span>, padding<span class="op">=</span><span class="dv">2</span>)]</span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>    layers <span class="op">+=</span> [res_blocks(nbks[i], nfs[i], nfs[i<span class="op">+</span><span class="dv">1</span>], act<span class="op">=</span>act, norm<span class="op">=</span>norm, stride<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>               <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(nfs)<span class="op">-</span><span class="dv">1</span>)]</span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>    layers <span class="op">+=</span> [act_gr(), norm(nfs[<span class="op">-</span><span class="dv">1</span>]), nn.AdaptiveAvgPool2d(<span class="dv">1</span>), nn.Flatten(), nn.Dropout(drop)]</span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>    layers <span class="op">+=</span> [nn.Linear(nfs[<span class="op">-</span><span class="dv">1</span>], <span class="dv">200</span>, bias<span class="op">=</span><span class="va">False</span>), nn.BatchNorm1d(<span class="dv">200</span>)]</span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> nn.Sequential(<span class="op">*</span>layers).<span class="bu">apply</span>(iw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-27" class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>metrics <span class="op">=</span> MetricsCB(accuracy<span class="op">=</span>MulticlassAccuracy())</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>cbs <span class="op">=</span> [DeviceCB(), metrics, ProgressCB(plot<span class="op">=</span><span class="va">True</span>), MixedPrecision()]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-28" class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>aug_tfms <span class="op">=</span> nn.Sequential(T.Pad(<span class="dv">4</span>), T.RandomCrop(<span class="dv">64</span>),</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                     T.RandomHorizontalFlip(),</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                     T.TrivialAugmentWide())</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>norm_tfm <span class="op">=</span> T.Normalize(xmean, xstd)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>erase_tfm <span class="op">=</span> RandErase()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-29" class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PIL <span class="im">import</span> Image</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-30" class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tfmx(x, aug<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> Image.<span class="bu">open</span>(x).convert(<span class="st">'RGB'</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> aug: x <span class="op">=</span> aug_tfms(x)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> TF.to_tensor(x)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> norm_tfm(x)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> aug: x <span class="op">=</span> erase_tfm(x[<span class="va">None</span>])[<span class="dv">0</span>]</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-31" class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>tfm_tds <span class="op">=</span> TfmDS(tds, partial(tfmx, aug<span class="op">=</span><span class="va">True</span>), tfmy)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>tfm_vds <span class="op">=</span> TfmDS(vds, tfmx, tfmy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-32" class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> DataLoaders(<span class="op">*</span>get_dls(tfm_tds, tfm_vds, bs<span class="op">=</span>bs, num_workers<span class="op">=</span><span class="dv">8</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-33" class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_model(): <span class="cf">return</span> get_dropmodel(drop<span class="op">=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-34" class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>learn <span class="op">=</span> TrainLearner(get_model(), dls, F.cross_entropy, cbs<span class="op">=</span>[SingleBatchCB(), DeviceCB()])</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>learn.fit(<span class="dv">1</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>xb,yb <span class="op">=</span> learn.batch</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>show_images(denorm(xb.cpu())[:<span class="dv">9</span>], imsize<span class="op">=</span><span class="fl">2.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="343_imgnet_tiny-200_files/figure-html/cell-33-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-35" class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>epochs <span class="op">=</span> <span class="dv">200</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> <span class="fl">0.1</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>tmax <span class="op">=</span> epochs <span class="op">*</span> <span class="bu">len</span>(dls.train)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>sched <span class="op">=</span> partial(lr_scheduler.OneCycleLR, max_lr<span class="op">=</span>lr, total_steps<span class="op">=</span>tmax)</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>xtra <span class="op">=</span> [BatchSchedCB(sched)]</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>learn <span class="op">=</span> Learner(get_model(), dls, F.cross_entropy, lr<span class="op">=</span>lr, cbs<span class="op">=</span>cbs<span class="op">+</span>xtra, opt_func<span class="op">=</span>opt_func)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-36" class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>learn.fit(epochs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">accuracy</th>
+<th data-quarto-table-cell-role="th">loss</th>
+<th data-quarto-table-cell-role="th">epoch</th>
+<th data-quarto-table-cell-role="th">train</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.025</td>
+<td>5.057</td>
+<td>0</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.043</td>
+<td>4.807</td>
+<td>0</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.049</td>
+<td>4.768</td>
+<td>1</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.065</td>
+<td>4.521</td>
+<td>1</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.079</td>
+<td>4.500</td>
+<td>2</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.111</td>
+<td>4.182</td>
+<td>2</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.116</td>
+<td>4.207</td>
+<td>3</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.159</td>
+<td>3.827</td>
+<td>3</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.152</td>
+<td>3.950</td>
+<td>4</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.193</td>
+<td>3.615</td>
+<td>4</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.185</td>
+<td>3.721</td>
+<td>5</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.242</td>
+<td>3.316</td>
+<td>5</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.220</td>
+<td>3.516</td>
+<td>6</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.286</td>
+<td>3.062</td>
+<td>6</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.246</td>
+<td>3.361</td>
+<td>7</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.306</td>
+<td>2.962</td>
+<td>7</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.270</td>
+<td>3.209</td>
+<td>8</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.309</td>
+<td>3.030</td>
+<td>8</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.293</td>
+<td>3.089</td>
+<td>9</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.344</td>
+<td>2.780</td>
+<td>9</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.312</td>
+<td>2.971</td>
+<td>10</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.355</td>
+<td>2.753</td>
+<td>10</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.335</td>
+<td>2.863</td>
+<td>11</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.384</td>
+<td>2.627</td>
+<td>11</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.350</td>
+<td>2.779</td>
+<td>12</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.381</td>
+<td>2.646</td>
+<td>12</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.365</td>
+<td>2.699</td>
+<td>13</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.388</td>
+<td>2.619</td>
+<td>13</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.379</td>
+<td>2.624</td>
+<td>14</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.409</td>
+<td>2.542</td>
+<td>14</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.390</td>
+<td>2.571</td>
+<td>15</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.410</td>
+<td>2.514</td>
+<td>15</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.405</td>
+<td>2.504</td>
+<td>16</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.405</td>
+<td>2.563</td>
+<td>16</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.410</td>
+<td>2.461</td>
+<td>17</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.426</td>
+<td>2.462</td>
+<td>17</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.419</td>
+<td>2.422</td>
+<td>18</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.442</td>
+<td>2.390</td>
+<td>18</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.427</td>
+<td>2.378</td>
+<td>19</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.451</td>
+<td>2.348</td>
+<td>19</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.434</td>
+<td>2.346</td>
+<td>20</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.413</td>
+<td>2.565</td>
+<td>20</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.439</td>
+<td>2.311</td>
+<td>21</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.371</td>
+<td>2.858</td>
+<td>21</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.447</td>
+<td>2.283</td>
+<td>22</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.390</td>
+<td>2.787</td>
+<td>22</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.449</td>
+<td>2.278</td>
+<td>23</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.434</td>
+<td>2.446</td>
+<td>23</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.452</td>
+<td>2.255</td>
+<td>24</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.444</td>
+<td>2.351</td>
+<td>24</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.455</td>
+<td>2.235</td>
+<td>25</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.438</td>
+<td>2.416</td>
+<td>25</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.458</td>
+<td>2.231</td>
+<td>26</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.457</td>
+<td>2.326</td>
+<td>26</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.459</td>
+<td>2.215</td>
+<td>27</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.455</td>
+<td>2.349</td>
+<td>27</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.464</td>
+<td>2.204</td>
+<td>28</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.442</td>
+<td>2.400</td>
+<td>28</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.464</td>
+<td>2.200</td>
+<td>29</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.344</td>
+<td>3.163</td>
+<td>29</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.467</td>
+<td>2.188</td>
+<td>30</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.403</td>
+<td>2.749</td>
+<td>30</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.463</td>
+<td>2.205</td>
+<td>31</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.407</td>
+<td>2.692</td>
+<td>31</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.465</td>
+<td>2.196</td>
+<td>32</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.400</td>
+<td>2.628</td>
+<td>32</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.462</td>
+<td>2.206</td>
+<td>33</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.467</td>
+<td>2.278</td>
+<td>33</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.465</td>
+<td>2.202</td>
+<td>34</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.452</td>
+<td>2.303</td>
+<td>34</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.462</td>
+<td>2.203</td>
+<td>35</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.452</td>
+<td>2.377</td>
+<td>35</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.464</td>
+<td>2.200</td>
+<td>36</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.437</td>
+<td>2.443</td>
+<td>36</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.465</td>
+<td>2.207</td>
+<td>37</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.436</td>
+<td>2.428</td>
+<td>37</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.462</td>
+<td>2.200</td>
+<td>38</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.423</td>
+<td>2.565</td>
+<td>38</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.463</td>
+<td>2.210</td>
+<td>39</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.357</td>
+<td>3.034</td>
+<td>39</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.460</td>
+<td>2.221</td>
+<td>40</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.396</td>
+<td>2.672</td>
+<td>40</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.459</td>
+<td>2.225</td>
+<td>41</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.450</td>
+<td>2.317</td>
+<td>41</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.459</td>
+<td>2.230</td>
+<td>42</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.446</td>
+<td>2.407</td>
+<td>42</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.458</td>
+<td>2.237</td>
+<td>43</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.397</td>
+<td>2.638</td>
+<td>43</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.459</td>
+<td>2.236</td>
+<td>44</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.439</td>
+<td>2.424</td>
+<td>44</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.456</td>
+<td>2.243</td>
+<td>45</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.445</td>
+<td>2.336</td>
+<td>45</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.455</td>
+<td>2.253</td>
+<td>46</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.412</td>
+<td>2.652</td>
+<td>46</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.453</td>
+<td>2.254</td>
+<td>47</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.380</td>
+<td>2.760</td>
+<td>47</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.456</td>
+<td>2.248</td>
+<td>48</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.400</td>
+<td>2.701</td>
+<td>48</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.453</td>
+<td>2.256</td>
+<td>49</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.409</td>
+<td>2.691</td>
+<td>49</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.451</td>
+<td>2.264</td>
+<td>50</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.354</td>
+<td>3.238</td>
+<td>50</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.452</td>
+<td>2.267</td>
+<td>51</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.434</td>
+<td>2.413</td>
+<td>51</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.450</td>
+<td>2.265</td>
+<td>52</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.431</td>
+<td>2.499</td>
+<td>52</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.452</td>
+<td>2.260</td>
+<td>53</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.447</td>
+<td>2.352</td>
+<td>53</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.452</td>
+<td>2.267</td>
+<td>54</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.442</td>
+<td>2.383</td>
+<td>54</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.447</td>
+<td>2.271</td>
+<td>55</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.405</td>
+<td>2.598</td>
+<td>55</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.451</td>
+<td>2.266</td>
+<td>56</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.418</td>
+<td>2.584</td>
+<td>56</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.450</td>
+<td>2.268</td>
+<td>57</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.419</td>
+<td>2.531</td>
+<td>57</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.452</td>
+<td>2.263</td>
+<td>58</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.457</td>
+<td>2.286</td>
+<td>58</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.451</td>
+<td>2.262</td>
+<td>59</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.351</td>
+<td>3.086</td>
+<td>59</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.449</td>
+<td>2.270</td>
+<td>60</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.387</td>
+<td>2.717</td>
+<td>60</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.456</td>
+<td>2.243</td>
+<td>61</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.427</td>
+<td>2.532</td>
+<td>61</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.456</td>
+<td>2.241</td>
+<td>62</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.408</td>
+<td>2.488</td>
+<td>62</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.455</td>
+<td>2.249</td>
+<td>63</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.405</td>
+<td>2.625</td>
+<td>63</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.456</td>
+<td>2.239</td>
+<td>64</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.420</td>
+<td>2.485</td>
+<td>64</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.456</td>
+<td>2.237</td>
+<td>65</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.411</td>
+<td>2.518</td>
+<td>65</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.457</td>
+<td>2.239</td>
+<td>66</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.417</td>
+<td>2.590</td>
+<td>66</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.457</td>
+<td>2.230</td>
+<td>67</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.354</td>
+<td>2.970</td>
+<td>67</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.458</td>
+<td>2.229</td>
+<td>68</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.424</td>
+<td>2.444</td>
+<td>68</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.460</td>
+<td>2.219</td>
+<td>69</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.347</td>
+<td>2.992</td>
+<td>69</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.463</td>
+<td>2.212</td>
+<td>70</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.395</td>
+<td>2.699</td>
+<td>70</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.463</td>
+<td>2.207</td>
+<td>71</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.339</td>
+<td>3.148</td>
+<td>71</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.464</td>
+<td>2.200</td>
+<td>72</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.353</td>
+<td>3.148</td>
+<td>72</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.464</td>
+<td>2.201</td>
+<td>73</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.434</td>
+<td>2.422</td>
+<td>73</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.466</td>
+<td>2.198</td>
+<td>74</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.424</td>
+<td>2.551</td>
+<td>74</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.471</td>
+<td>2.179</td>
+<td>75</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.393</td>
+<td>2.710</td>
+<td>75</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.468</td>
+<td>2.183</td>
+<td>76</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.405</td>
+<td>2.624</td>
+<td>76</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.465</td>
+<td>2.194</td>
+<td>77</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.417</td>
+<td>2.578</td>
+<td>77</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.471</td>
+<td>2.172</td>
+<td>78</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.440</td>
+<td>2.477</td>
+<td>78</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.471</td>
+<td>2.164</td>
+<td>79</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.392</td>
+<td>2.752</td>
+<td>79</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.473</td>
+<td>2.161</td>
+<td>80</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.424</td>
+<td>2.490</td>
+<td>80</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.473</td>
+<td>2.164</td>
+<td>81</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.420</td>
+<td>2.547</td>
+<td>81</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.476</td>
+<td>2.147</td>
+<td>82</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.394</td>
+<td>2.779</td>
+<td>82</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.475</td>
+<td>2.155</td>
+<td>83</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.400</td>
+<td>2.747</td>
+<td>83</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.477</td>
+<td>2.138</td>
+<td>84</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.397</td>
+<td>2.684</td>
+<td>84</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.481</td>
+<td>2.134</td>
+<td>85</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.442</td>
+<td>2.428</td>
+<td>85</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.479</td>
+<td>2.122</td>
+<td>86</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.371</td>
+<td>2.966</td>
+<td>86</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.482</td>
+<td>2.123</td>
+<td>87</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.410</td>
+<td>2.634</td>
+<td>87</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.481</td>
+<td>2.121</td>
+<td>88</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.442</td>
+<td>2.399</td>
+<td>88</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.482</td>
+<td>2.111</td>
+<td>89</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.461</td>
+<td>2.331</td>
+<td>89</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.487</td>
+<td>2.092</td>
+<td>90</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.435</td>
+<td>2.423</td>
+<td>90</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.487</td>
+<td>2.092</td>
+<td>91</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.414</td>
+<td>2.691</td>
+<td>91</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.486</td>
+<td>2.089</td>
+<td>92</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.384</td>
+<td>2.826</td>
+<td>92</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.493</td>
+<td>2.062</td>
+<td>93</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.462</td>
+<td>2.385</td>
+<td>93</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.494</td>
+<td>2.056</td>
+<td>94</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.460</td>
+<td>2.318</td>
+<td>94</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.493</td>
+<td>2.056</td>
+<td>95</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.418</td>
+<td>2.625</td>
+<td>95</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.497</td>
+<td>2.045</td>
+<td>96</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.444</td>
+<td>2.455</td>
+<td>96</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.495</td>
+<td>2.043</td>
+<td>97</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.484</td>
+<td>2.159</td>
+<td>97</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.503</td>
+<td>2.016</td>
+<td>98</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.417</td>
+<td>2.637</td>
+<td>98</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.504</td>
+<td>2.016</td>
+<td>99</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.384</td>
+<td>2.846</td>
+<td>99</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.503</td>
+<td>2.016</td>
+<td>100</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.494</td>
+<td>2.186</td>
+<td>100</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.504</td>
+<td>2.008</td>
+<td>101</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.436</td>
+<td>2.522</td>
+<td>101</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.509</td>
+<td>1.988</td>
+<td>102</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.445</td>
+<td>2.428</td>
+<td>102</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.508</td>
+<td>1.986</td>
+<td>103</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.488</td>
+<td>2.131</td>
+<td>103</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.512</td>
+<td>1.973</td>
+<td>104</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.485</td>
+<td>2.196</td>
+<td>104</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.515</td>
+<td>1.959</td>
+<td>105</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.486</td>
+<td>2.231</td>
+<td>105</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.515</td>
+<td>1.953</td>
+<td>106</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.461</td>
+<td>2.331</td>
+<td>106</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.522</td>
+<td>1.924</td>
+<td>107</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.477</td>
+<td>2.287</td>
+<td>107</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.522</td>
+<td>1.920</td>
+<td>108</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.452</td>
+<td>2.439</td>
+<td>108</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.522</td>
+<td>1.921</td>
+<td>109</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.493</td>
+<td>2.176</td>
+<td>109</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.525</td>
+<td>1.909</td>
+<td>110</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.488</td>
+<td>2.259</td>
+<td>110</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.528</td>
+<td>1.894</td>
+<td>111</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.477</td>
+<td>2.305</td>
+<td>111</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.532</td>
+<td>1.879</td>
+<td>112</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.485</td>
+<td>2.224</td>
+<td>112</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.536</td>
+<td>1.862</td>
+<td>113</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.485</td>
+<td>2.244</td>
+<td>113</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.538</td>
+<td>1.850</td>
+<td>114</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.451</td>
+<td>2.439</td>
+<td>114</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.540</td>
+<td>1.842</td>
+<td>115</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.482</td>
+<td>2.231</td>
+<td>115</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.545</td>
+<td>1.824</td>
+<td>116</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.506</td>
+<td>2.124</td>
+<td>116</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.548</td>
+<td>1.803</td>
+<td>117</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.461</td>
+<td>2.427</td>
+<td>117</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.550</td>
+<td>1.797</td>
+<td>118</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.510</td>
+<td>2.132</td>
+<td>118</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.555</td>
+<td>1.774</td>
+<td>119</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.504</td>
+<td>2.124</td>
+<td>119</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.556</td>
+<td>1.767</td>
+<td>120</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.447</td>
+<td>2.468</td>
+<td>120</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.560</td>
+<td>1.748</td>
+<td>121</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.472</td>
+<td>2.329</td>
+<td>121</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.563</td>
+<td>1.736</td>
+<td>122</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.488</td>
+<td>2.283</td>
+<td>122</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.568</td>
+<td>1.714</td>
+<td>123</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.466</td>
+<td>2.340</td>
+<td>123</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.568</td>
+<td>1.710</td>
+<td>124</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.464</td>
+<td>2.382</td>
+<td>124</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.574</td>
+<td>1.686</td>
+<td>125</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.451</td>
+<td>2.466</td>
+<td>125</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.578</td>
+<td>1.668</td>
+<td>126</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.518</td>
+<td>2.113</td>
+<td>126</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.584</td>
+<td>1.647</td>
+<td>127</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.495</td>
+<td>2.331</td>
+<td>127</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.585</td>
+<td>1.635</td>
+<td>128</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.496</td>
+<td>2.276</td>
+<td>128</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.589</td>
+<td>1.619</td>
+<td>129</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.452</td>
+<td>2.528</td>
+<td>129</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.594</td>
+<td>1.596</td>
+<td>130</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.534</td>
+<td>2.063</td>
+<td>130</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.596</td>
+<td>1.587</td>
+<td>131</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.522</td>
+<td>2.098</td>
+<td>131</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.600</td>
+<td>1.561</td>
+<td>132</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.535</td>
+<td>1.996</td>
+<td>132</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.606</td>
+<td>1.536</td>
+<td>133</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.539</td>
+<td>1.994</td>
+<td>133</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.609</td>
+<td>1.528</td>
+<td>134</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.506</td>
+<td>2.207</td>
+<td>134</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.610</td>
+<td>1.513</td>
+<td>135</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.515</td>
+<td>2.208</td>
+<td>135</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.620</td>
+<td>1.477</td>
+<td>136</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.542</td>
+<td>1.923</td>
+<td>136</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.625</td>
+<td>1.460</td>
+<td>137</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.521</td>
+<td>2.127</td>
+<td>137</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.627</td>
+<td>1.438</td>
+<td>138</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.518</td>
+<td>2.218</td>
+<td>138</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.635</td>
+<td>1.417</td>
+<td>139</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.515</td>
+<td>2.151</td>
+<td>139</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.641</td>
+<td>1.387</td>
+<td>140</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.555</td>
+<td>1.921</td>
+<td>140</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.646</td>
+<td>1.364</td>
+<td>141</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.526</td>
+<td>2.154</td>
+<td>141</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.648</td>
+<td>1.355</td>
+<td>142</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.544</td>
+<td>2.087</td>
+<td>142</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.654</td>
+<td>1.325</td>
+<td>143</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.558</td>
+<td>1.904</td>
+<td>143</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.661</td>
+<td>1.300</td>
+<td>144</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.551</td>
+<td>2.035</td>
+<td>144</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.667</td>
+<td>1.281</td>
+<td>145</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.537</td>
+<td>2.157</td>
+<td>145</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.671</td>
+<td>1.253</td>
+<td>146</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.558</td>
+<td>1.982</td>
+<td>146</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.678</td>
+<td>1.233</td>
+<td>147</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.553</td>
+<td>2.052</td>
+<td>147</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.682</td>
+<td>1.216</td>
+<td>148</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.547</td>
+<td>2.070</td>
+<td>148</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.690</td>
+<td>1.180</td>
+<td>149</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.571</td>
+<td>1.968</td>
+<td>149</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.699</td>
+<td>1.144</td>
+<td>150</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.578</td>
+<td>1.882</td>
+<td>150</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.702</td>
+<td>1.136</td>
+<td>151</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.574</td>
+<td>1.972</td>
+<td>151</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.711</td>
+<td>1.098</td>
+<td>152</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.571</td>
+<td>1.981</td>
+<td>152</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.716</td>
+<td>1.073</td>
+<td>153</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.589</td>
+<td>1.899</td>
+<td>153</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.725</td>
+<td>1.044</td>
+<td>154</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.561</td>
+<td>2.112</td>
+<td>154</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.728</td>
+<td>1.036</td>
+<td>155</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.592</td>
+<td>1.967</td>
+<td>155</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.733</td>
+<td>1.005</td>
+<td>156</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.567</td>
+<td>2.035</td>
+<td>156</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.741</td>
+<td>0.978</td>
+<td>157</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.573</td>
+<td>2.003</td>
+<td>157</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.749</td>
+<td>0.947</td>
+<td>158</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.599</td>
+<td>1.874</td>
+<td>158</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.755</td>
+<td>0.929</td>
+<td>159</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.596</td>
+<td>1.894</td>
+<td>159</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.766</td>
+<td>0.892</td>
+<td>160</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.600</td>
+<td>1.913</td>
+<td>160</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.770</td>
+<td>0.866</td>
+<td>161</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.606</td>
+<td>1.850</td>
+<td>161</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.777</td>
+<td>0.839</td>
+<td>162</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.604</td>
+<td>1.852</td>
+<td>162</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.786</td>
+<td>0.814</td>
+<td>163</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.592</td>
+<td>1.922</td>
+<td>163</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.789</td>
+<td>0.800</td>
+<td>164</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.604</td>
+<td>1.832</td>
+<td>164</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.796</td>
+<td>0.769</td>
+<td>165</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.613</td>
+<td>1.781</td>
+<td>165</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.801</td>
+<td>0.747</td>
+<td>166</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.617</td>
+<td>1.826</td>
+<td>166</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.808</td>
+<td>0.731</td>
+<td>167</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.609</td>
+<td>1.871</td>
+<td>167</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.817</td>
+<td>0.695</td>
+<td>168</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.621</td>
+<td>1.781</td>
+<td>168</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.825</td>
+<td>0.669</td>
+<td>169</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.622</td>
+<td>1.788</td>
+<td>169</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.828</td>
+<td>0.656</td>
+<td>170</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.624</td>
+<td>1.763</td>
+<td>170</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.835</td>
+<td>0.631</td>
+<td>171</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.635</td>
+<td>1.761</td>
+<td>171</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.842</td>
+<td>0.605</td>
+<td>172</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.641</td>
+<td>1.699</td>
+<td>172</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.845</td>
+<td>0.589</td>
+<td>173</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.629</td>
+<td>1.740</td>
+<td>173</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.852</td>
+<td>0.566</td>
+<td>174</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.621</td>
+<td>1.812</td>
+<td>174</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.859</td>
+<td>0.542</td>
+<td>175</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.637</td>
+<td>1.716</td>
+<td>175</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.860</td>
+<td>0.533</td>
+<td>176</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.646</td>
+<td>1.710</td>
+<td>176</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.866</td>
+<td>0.509</td>
+<td>177</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.652</td>
+<td>1.685</td>
+<td>177</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.870</td>
+<td>0.495</td>
+<td>178</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.654</td>
+<td>1.644</td>
+<td>178</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.876</td>
+<td>0.472</td>
+<td>179</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.652</td>
+<td>1.638</td>
+<td>179</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.882</td>
+<td>0.452</td>
+<td>180</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.654</td>
+<td>1.630</td>
+<td>180</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.884</td>
+<td>0.443</td>
+<td>181</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.653</td>
+<td>1.651</td>
+<td>181</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.889</td>
+<td>0.424</td>
+<td>182</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.661</td>
+<td>1.592</td>
+<td>182</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.893</td>
+<td>0.412</td>
+<td>183</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.661</td>
+<td>1.584</td>
+<td>183</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.896</td>
+<td>0.403</td>
+<td>184</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.663</td>
+<td>1.595</td>
+<td>184</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.899</td>
+<td>0.391</td>
+<td>185</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.666</td>
+<td>1.572</td>
+<td>185</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.903</td>
+<td>0.372</td>
+<td>186</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.669</td>
+<td>1.551</td>
+<td>186</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.905</td>
+<td>0.366</td>
+<td>187</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.668</td>
+<td>1.561</td>
+<td>187</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.907</td>
+<td>0.354</td>
+<td>188</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.670</td>
+<td>1.540</td>
+<td>188</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.909</td>
+<td>0.346</td>
+<td>189</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.672</td>
+<td>1.526</td>
+<td>189</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.911</td>
+<td>0.342</td>
+<td>190</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.674</td>
+<td>1.522</td>
+<td>190</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.912</td>
+<td>0.335</td>
+<td>191</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.676</td>
+<td>1.521</td>
+<td>191</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.915</td>
+<td>0.327</td>
+<td>192</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.675</td>
+<td>1.507</td>
+<td>192</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.915</td>
+<td>0.323</td>
+<td>193</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.675</td>
+<td>1.504</td>
+<td>193</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.919</td>
+<td>0.312</td>
+<td>194</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.675</td>
+<td>1.507</td>
+<td>194</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.917</td>
+<td>0.318</td>
+<td>195</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.676</td>
+<td>1.505</td>
+<td>195</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.917</td>
+<td>0.315</td>
+<td>196</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.679</td>
+<td>1.502</td>
+<td>196</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.918</td>
+<td>0.311</td>
+<td>197</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.677</td>
+<td>1.504</td>
+<td>197</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.918</td>
+<td>0.315</td>
+<td>198</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.676</td>
+<td>1.505</td>
+<td>198</td>
+<td>eval</td>
+</tr>
+<tr class="odd">
+<td>0.919</td>
+<td>0.309</td>
+<td>199</td>
+<td>train</td>
+</tr>
+<tr class="even">
+<td>0.675</td>
+<td>1.502</td>
+<td>199</td>
+<td>eval</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="343_imgnet_tiny-200_files/figure-html/cell-35-output-3.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-37" class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>torch.save(learn.model, <span class="st">'models/inettiny-trivaug-200'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/bthek1\.github\.io\/fastAIcourse");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://utteranc.es/client.js" repo="quarto-dev/quarto-web" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./imgnet_tiny-wide.html" class="pagination-link" aria-label="Tiny Imagenet">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Tiny Imagenet</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./superres.html" class="pagination-link" aria-label="Tiny Imagenet">
+        <span class="nav-page-text">Tiny Imagenet</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link active" href="./index.html" aria-current="page">
+<p>Trademark</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="https://github.com/bthek1/B_Blog/issues">
+<p>FAQ</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="https://bthek1.github.io/benedicts_blog/Index.html">
+<p>License</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="./index.html">
+<p>Trademark</p>
+</a>
+  </li>  
+</ul>
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/bthek1/fastAIcourse/blob/main/343_imgnet_tiny-200.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/bthek1/fastAIcourse/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/bthek1">
+      <i class="bi bi-github" role="img" aria-label="Github">
+</i> 
+    </a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/benedict-thekkel/">
+      <i class="bi bi-linkedin" role="img" aria-label="Linkedin">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
