@@ -6,13 +6,13 @@
 __all__ = ['Model', 'log_softmax', 'logsumexp', 'nll', 'accuracy', 'report', 'MLP', 'fit', 'MyModule', 'SequentialModel',
            'Optimizer', 'get_model', 'Dataset', 'DataLoader', 'Sampler', 'BatchSampler', 'collate', 'get_dls']
 
-# %% ../nbs/140_minibatch_training.ipynb #25e15a93
+# %% ../nbs/140_minibatch_training.ipynb #b56c5d10
 import pickle,gzip,math,os,time,shutil,torch,matplotlib as mpl,numpy as np,matplotlib.pyplot as plt
 from pathlib import Path
 from torch import tensor,nn
 import torch.nn.functional as F
 
-# %% ../nbs/140_minibatch_training.ipynb #140e26ef
+# %% ../nbs/140_minibatch_training.ipynb #62fee37f
 class Model(nn.Module):
     def __init__(self, n_in, nh, n_out):
         super().__init__()
@@ -22,30 +22,30 @@ class Model(nn.Module):
         for l in self.layers: x = l(x)
         return x
 
-# %% ../nbs/140_minibatch_training.ipynb #2fd493b5
+# %% ../nbs/140_minibatch_training.ipynb #14dacc1c
 def log_softmax(x): return (x.exp()/(x.exp().sum(-1,keepdim=True))).log()
 
-# %% ../nbs/140_minibatch_training.ipynb #886c2cf3
+# %% ../nbs/140_minibatch_training.ipynb #5cfd3d1a
 def log_softmax(x): return x - x.exp().sum(-1,keepdim=True).log()
 
-# %% ../nbs/140_minibatch_training.ipynb #495d049c
+# %% ../nbs/140_minibatch_training.ipynb #1af3e92b
 def logsumexp(x):
     m = x.max(-1)[0]
     return m + (x-m[:,None]).exp().sum(-1).log()
 
-# %% ../nbs/140_minibatch_training.ipynb #f81aeccf
+# %% ../nbs/140_minibatch_training.ipynb #9566691a
 def log_softmax(x): return x - x.logsumexp(-1,keepdim=True)
 
-# %% ../nbs/140_minibatch_training.ipynb #45df4a29
+# %% ../nbs/140_minibatch_training.ipynb #a8a6784e
 def nll(input, target): return -input[range(target.shape[0]), target].mean()
 
-# %% ../nbs/140_minibatch_training.ipynb #0b2caa08
+# %% ../nbs/140_minibatch_training.ipynb #f53d7324
 def accuracy(out, yb): return (out.argmax(dim=1)==yb).float().mean()
 
-# %% ../nbs/140_minibatch_training.ipynb #430aec75
+# %% ../nbs/140_minibatch_training.ipynb #dfa81890
 def report(loss, preds, yb): print(f'{loss:.2f}, {accuracy(preds, yb):.2f}')
 
-# %% ../nbs/140_minibatch_training.ipynb #d0c7d13b
+# %% ../nbs/140_minibatch_training.ipynb #8c8e0871
 class MLP(nn.Module):
     def __init__(self, n_in, nh, n_out):
         super().__init__()
@@ -55,7 +55,7 @@ class MLP(nn.Module):
         
     def forward(self, x): return self.l2(self.relu(self.l1(x)))
 
-# %% ../nbs/140_minibatch_training.ipynb #15f54ae4
+# %% ../nbs/140_minibatch_training.ipynb #a5e25818
 def fit():
     for epoch in range(epochs):
         for i in range(0, n, bs):
@@ -69,7 +69,7 @@ def fit():
                 model.zero_grad()
         report(loss, preds, yb)
 
-# %% ../nbs/140_minibatch_training.ipynb #51ada4d4
+# %% ../nbs/140_minibatch_training.ipynb #a3a528bb
 class MyModule:
     def __init__(self, n_in, nh, n_out):
         self._modules = {}
@@ -85,10 +85,10 @@ class MyModule:
     def parameters(self):
         for l in self._modules.values(): yield from l.parameters()
 
-# %% ../nbs/140_minibatch_training.ipynb #58a37a77
+# %% ../nbs/140_minibatch_training.ipynb #8e71eeb4
 from functools import reduce
 
-# %% ../nbs/140_minibatch_training.ipynb #96a96ea1
+# %% ../nbs/140_minibatch_training.ipynb #a73494b0
 class Model(nn.Module):
     def __init__(self, layers):
         super().__init__()
@@ -97,7 +97,7 @@ class Model(nn.Module):
 
     def forward(self, x): return reduce(lambda val,layer: layer(val), self.layers, x)
 
-# %% ../nbs/140_minibatch_training.ipynb #90cd39be
+# %% ../nbs/140_minibatch_training.ipynb #9c9536e8
 class SequentialModel(nn.Module):
     def __init__(self, layers):
         super().__init__()
@@ -107,7 +107,7 @@ class SequentialModel(nn.Module):
         for l in self.layers: x = l(x)
         return x
 
-# %% ../nbs/140_minibatch_training.ipynb #fae6da92
+# %% ../nbs/140_minibatch_training.ipynb #170f0fa7
 class Optimizer():
     def __init__(self, params, lr=0.5): self.params,self.lr=list(params),lr
 
@@ -118,27 +118,27 @@ class Optimizer():
     def zero_grad(self):
         for p in self.params: p.grad.data.zero_()
 
-# %% ../nbs/140_minibatch_training.ipynb #8577255e
+# %% ../nbs/140_minibatch_training.ipynb #a2c540da
 from torch import optim
 
-# %% ../nbs/140_minibatch_training.ipynb #a6c0d498
+# %% ../nbs/140_minibatch_training.ipynb #4a4f75a3
 def get_model():
     model = nn.Sequential(nn.Linear(m,nh), nn.ReLU(), nn.Linear(nh,10))
     return model, optim.SGD(model.parameters(), lr=lr)
 
-# %% ../nbs/140_minibatch_training.ipynb #cc201691
+# %% ../nbs/140_minibatch_training.ipynb #c532671d
 class Dataset():
     def __init__(self, x, y): self.x,self.y = x,y
     def __len__(self): return len(self.x)
     def __getitem__(self, i): return self.x[i],self.y[i]
 
-# %% ../nbs/140_minibatch_training.ipynb #f0235cf0
+# %% ../nbs/140_minibatch_training.ipynb #6d716776
 class DataLoader():
     def __init__(self, ds, bs): self.ds,self.bs = ds,bs
     def __iter__(self):
         for i in range(0, len(self.ds), self.bs): yield self.ds[i:i+self.bs]
 
-# %% ../nbs/140_minibatch_training.ipynb #dd6f9031
+# %% ../nbs/140_minibatch_training.ipynb #227a4960
 def fit():
     for epoch in range(epochs):
         for xb,yb in train_dl:
@@ -149,10 +149,10 @@ def fit():
             opt.zero_grad()
         report(loss, preds, yb)
 
-# %% ../nbs/140_minibatch_training.ipynb #5333342c
+# %% ../nbs/140_minibatch_training.ipynb #59321448
 import random
 
-# %% ../nbs/140_minibatch_training.ipynb #feb6d3b1
+# %% ../nbs/140_minibatch_training.ipynb #6cbd2193
 class Sampler():
     def __init__(self, ds, shuffle=False): self.n,self.shuffle = len(ds),shuffle
     def __iter__(self):
@@ -160,41 +160,41 @@ class Sampler():
         if self.shuffle: random.shuffle(res)
         return iter(res)
 
-# %% ../nbs/140_minibatch_training.ipynb #558bd81d
+# %% ../nbs/140_minibatch_training.ipynb #a5bc02d7
 from itertools import islice
 
-# %% ../nbs/140_minibatch_training.ipynb #bb090da7
+# %% ../nbs/140_minibatch_training.ipynb #e2f26b16
 import fastcore.all as fc
 
-# %% ../nbs/140_minibatch_training.ipynb #c1af0b1e
+# %% ../nbs/140_minibatch_training.ipynb #d98c050b
 class BatchSampler():
     def __init__(self, sampler, bs, drop_last=False): fc.store_attr()
     def __iter__(self): yield from fc.chunked(iter(self.sampler), self.bs, drop_last=self.drop_last)
 
-# %% ../nbs/140_minibatch_training.ipynb #031a2bee
+# %% ../nbs/140_minibatch_training.ipynb #95bb6377
 def collate(b):
     xs,ys = zip(*b)
     return torch.stack(xs),torch.stack(ys)
 
-# %% ../nbs/140_minibatch_training.ipynb #5fb5a082
+# %% ../nbs/140_minibatch_training.ipynb #10cf923b
 class DataLoader():
     def __init__(self, ds, batchs, collate_fn=collate): fc.store_attr()
     def __iter__(self): yield from (self.collate_fn(self.ds[i] for i in b) for b in self.batchs)
 
-# %% ../nbs/140_minibatch_training.ipynb #c4c15fe0
+# %% ../nbs/140_minibatch_training.ipynb #ee3be279
 import torch.multiprocessing as mp
 from fastcore.basics import store_attr
 
-# %% ../nbs/140_minibatch_training.ipynb #206dee8b
+# %% ../nbs/140_minibatch_training.ipynb #27d0e757
 class DataLoader():
     def __init__(self, ds, batchs, n_workers=1, collate_fn=collate): fc.store_attr()
     def __iter__(self):
         with mp.Pool(self.n_workers) as ex: yield from ex.map(self.ds.__getitem__, iter(self.batchs))
 
-# %% ../nbs/140_minibatch_training.ipynb #0d6c5ee5
+# %% ../nbs/140_minibatch_training.ipynb #9c8c78d8
 from torch.utils.data import DataLoader, SequentialSampler, RandomSampler, BatchSampler
 
-# %% ../nbs/140_minibatch_training.ipynb #031df072
+# %% ../nbs/140_minibatch_training.ipynb #eb0f3c6d
 def fit(epochs, model, loss_func, opt, train_dl, valid_dl):
     for epoch in range(epochs):
         model.train()
@@ -216,7 +216,7 @@ def fit(epochs, model, loss_func, opt, train_dl, valid_dl):
         print(epoch, tot_loss/count, tot_acc/count)
     return tot_loss/count, tot_acc/count
 
-# %% ../nbs/140_minibatch_training.ipynb #dab3c549
+# %% ../nbs/140_minibatch_training.ipynb #df8554c5
 def get_dls(train_ds, valid_ds, bs, **kwargs):
     return (DataLoader(train_ds, batch_size=bs, shuffle=True, **kwargs),
             DataLoader(valid_ds, batch_size=bs*2, **kwargs))

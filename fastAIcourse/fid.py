@@ -3,7 +3,7 @@
 # %% auto #0
 __all__ = ['append_outp', 'noisify', 'collate_ddpm', 'dl_ddpm', 'UNet', 'sample', 'ImageEval']
 
-# %% ../nbs/280_fid.ipynb #d6cef994
+# %% ../nbs/280_fid.ipynb #fc43510b
 import pickle,gzip,math,os,time,shutil,torch,random
 import fastcore.all as fc,matplotlib as mpl,numpy as np,matplotlib.pyplot as plt
 from collections.abc import Mapping
@@ -34,12 +34,12 @@ from .resnet import *
 from .augment import *
 from .accel import *
 
-# %% ../nbs/280_fid.ipynb #700b0645
+# %% ../nbs/280_fid.ipynb #ca398510
 def append_outp(hook, mod, inp, outp):
     if not hasattr(hook,'outp'): hook.outp = []
     hook.outp.append(to_cpu(outp))
 
-# %% ../nbs/280_fid.ipynb #c75f0fbd
+# %% ../nbs/280_fid.ipynb #1e3f24c6
 def noisify(x0, ᾱ):
     device = x0.device
     n = len(x0)
@@ -52,13 +52,13 @@ def noisify(x0, ᾱ):
 def collate_ddpm(b): return noisify(default_collate(b)[xl], alphabar)
 def dl_ddpm(ds): return DataLoader(ds, batch_size=bs, collate_fn=collate_ddpm, num_workers=4)
 
-# %% ../nbs/280_fid.ipynb #8ad45e79
+# %% ../nbs/280_fid.ipynb #b98ecbd3
 from diffusers import UNet2DModel
 
 class UNet(UNet2DModel):
     def forward(self, x): return super().forward(*x).sample
 
-# %% ../nbs/280_fid.ipynb #24e677b8
+# %% ../nbs/280_fid.ipynb #2c326cc9
 @torch.no_grad()
 def sample(model, sz, alpha, alphabar, sigma, n_steps):
     device = next(model.parameters()).device
@@ -75,7 +75,7 @@ def sample(model, sz, alpha, alphabar, sigma, n_steps):
         preds.append(x_0_hat.cpu())
     return preds
 
-# %% ../nbs/280_fid.ipynb #d82e2408
+# %% ../nbs/280_fid.ipynb #542fee68
 def _sqrtm_newton_schulz(mat, num_iters=100):
     mat_nrm = mat.norm()
     mat = mat.double()
@@ -91,7 +91,7 @@ def _sqrtm_newton_schulz(mat, num_iters=100):
         if ((mat-(res@res)).norm()/mat_nrm).abs()<=1e-6: break
     return res
 
-# %% ../nbs/280_fid.ipynb #89106f18
+# %% ../nbs/280_fid.ipynb #69888989
 def _calc_stats(feats):
     feats = feats.squeeze()
     return feats.mean(0),feats.T.cov()
@@ -101,7 +101,7 @@ def _calc_fid(m1,c1,m2,c2):
     csr = tensor(linalg.sqrtm(c1@c2, 256).real)
     return (((m1-m2)**2).sum() + c1.trace() + c2.trace() - 2*csr.trace()).item()
 
-# %% ../nbs/280_fid.ipynb #5009efc9
+# %% ../nbs/280_fid.ipynb #f4f23805
 def _squared_mmd(x, y):
     def k(a,b): return (a@b.transpose(-2,-1)/a.shape[-1]+1)**3
     m,n = x.shape[-2],y.shape[-2]
@@ -111,7 +111,7 @@ def _squared_mmd(x, y):
     kxy_sum = kxy.sum([-1,-2])
     return kxx_sum/m/(m-1) + kyy_sum/n/(n-1) - kxy_sum*2/m/n
 
-# %% ../nbs/280_fid.ipynb #145021f4
+# %% ../nbs/280_fid.ipynb #b74a6756
 def _calc_kid(x, y, maxs=50):
     xs,ys = x.shape[0],y.shape[0]
     n = max(math.ceil(min(xs/maxs, ys/maxs)), 4)
@@ -122,7 +122,7 @@ def _calc_kid(x, y, maxs=50):
         mmd += _squared_mmd(cur_x, cur_y)
     return (mmd/n).item()
 
-# %% ../nbs/280_fid.ipynb #8533d7bd
+# %% ../nbs/280_fid.ipynb #9720b252
 class ImageEval:
     def __init__(self, model, dls, cbs=None):
         self.learn = TrainLearner(model, dls, loss_func=fc.noop, cbs=cbs, opt_func=None)

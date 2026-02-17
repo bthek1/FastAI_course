@@ -5,7 +5,7 @@
 # %% auto #0
 __all__ = ['act_gr', 'get_model', 'ResBlock', 'summary']
 
-# %% ../nbs/230_resnet.ipynb #02da9564
+# %% ../nbs/230_resnet.ipynb #e64c4667
 import pickle,gzip,math,os,time,shutil,torch,matplotlib as mpl,numpy as np,matplotlib.pyplot as plt
 import fastcore.all as fc
 from collections.abc import Mapping
@@ -30,16 +30,16 @@ from .activations import *
 from .init import *
 from .sgd import *
 
-# %% ../nbs/230_resnet.ipynb #7d7c2864
+# %% ../nbs/230_resnet.ipynb #631e2949
 act_gr = partial(GeneralRelu, leak=0.1, sub=0.4)
 
-# %% ../nbs/230_resnet.ipynb #4812cb83
+# %% ../nbs/230_resnet.ipynb #eaadb1a3
 def get_model(act=nn.ReLU, nfs=(8,16,32,64,128), norm=nn.BatchNorm2d):
     layers = [conv(1, 8, stride=1, act=act, norm=norm)]
     layers += [conv(nfs[i], nfs[i+1], act=act, norm=norm) for i in range(len(nfs)-1)]
     return nn.Sequential(*layers, conv(nfs[-1], 10, act=None, norm=norm, bias=True), nn.Flatten()).to(def_device)
 
-# %% ../nbs/230_resnet.ipynb #32b7e7a8
+# %% ../nbs/230_resnet.ipynb #42aa63d1
 def _conv_block(ni, nf, stride, act=act_gr, norm=None, ks=3):
     return nn.Sequential(conv(ni, nf, stride=1, act=act, norm=norm, ks=ks),
                          conv(nf, nf, stride=stride, act=None, norm=norm, ks=ks))
@@ -54,14 +54,14 @@ class ResBlock(nn.Module):
 
     def forward(self, x): return self.act(self.convs(x) + self.idconv(self.pool(x)))
 
-# %% ../nbs/230_resnet.ipynb #7c3394e9
+# %% ../nbs/230_resnet.ipynb #c59c79d6
 def get_model(act=nn.ReLU, nfs=(8,16,32,64,128,256), norm=nn.BatchNorm2d):
     layers = [ResBlock(1, 8, stride=1, act=act, norm=norm)]
     layers += [ResBlock(nfs[i], nfs[i+1], act=act, norm=norm, stride=2) for i in range(len(nfs)-1)]
     layers += [nn.Flatten(), nn.Linear(nfs[-1], 10, bias=False), nn.BatchNorm1d(10)]
     return nn.Sequential(*layers).to(def_device)
 
-# %% ../nbs/230_resnet.ipynb #16fcbc81
+# %% ../nbs/230_resnet.ipynb #e568878d
 @fc.patch
 def summary(self:Learner):
     res = '|Module|Input|Output|Num params|\n|--|--|--|--|\n'

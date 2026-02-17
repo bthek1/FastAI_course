@@ -6,7 +6,7 @@
 __all__ = ['SGD', 'Momentum', 'RMSProp', 'Adam', 'sched_lrs', 'BaseSchedCB', 'BatchSchedCB', 'HasLearnCB', 'RecorderCB',
            'EpochSchedCB']
 
-# %% ../nbs/220_accel_sgd.ipynb #41d2bf76
+# %% ../nbs/220_accel_sgd.ipynb #fc0f7129
 import torch
 
 from .datasets import *
@@ -15,7 +15,7 @@ from .learner import *
 from .activations import *
 from .init import *
 
-# %% ../nbs/220_accel_sgd.ipynb #7943aaf8
+# %% ../nbs/220_accel_sgd.ipynb #cad05865
 import pickle,gzip,math,os,time,shutil,torch,matplotlib as mpl,numpy as np,matplotlib.pyplot as plt
 import fastcore.all as fc
 from collections.abc import Mapping
@@ -34,7 +34,7 @@ from torcheval.metrics import MulticlassAccuracy
 from datasets import load_dataset,load_dataset_builder
 
 
-# %% ../nbs/220_accel_sgd.ipynb #92343bd9
+# %% ../nbs/220_accel_sgd.ipynb #81e161a7
 from fastcore.test import test_close
 
 torch.set_printoptions(precision=2, linewidth=140, sci_mode=False)
@@ -45,7 +45,7 @@ logging.disable(logging.WARNING)
 
 set_seed(42)
 
-# %% ../nbs/220_accel_sgd.ipynb #becdb68c
+# %% ../nbs/220_accel_sgd.ipynb #dfb7eed2
 class SGD:
     def __init__(self, params, lr, wd=0.):
         params = list(params)
@@ -66,7 +66,7 @@ class SGD:
     def zero_grad(self):
         for p in self.params: p.grad.data.zero_()
 
-# %% ../nbs/220_accel_sgd.ipynb #b8423225
+# %% ../nbs/220_accel_sgd.ipynb #490a92b6
 class Momentum(SGD):
     def __init__(self, params, lr, wd=0., mom=0.9):
         super().__init__(params, lr=lr, wd=wd)
@@ -77,7 +77,7 @@ class Momentum(SGD):
         p.grad_avg = p.grad_avg*self.mom + p.grad*(1-self.mom)
         p -= self.lr * p.grad_avg
 
-# %% ../nbs/220_accel_sgd.ipynb #cc98eb15
+# %% ../nbs/220_accel_sgd.ipynb #244a54f3
 class RMSProp(SGD):
     def __init__(self, params, lr, wd=0., sqr_mom=0.99, eps=1e-5):
         super().__init__(params, lr=lr, wd=wd)
@@ -88,7 +88,7 @@ class RMSProp(SGD):
         p.sqr_avg = p.sqr_avg*self.sqr_mom + p.grad**2*(1-self.sqr_mom)
         p -= self.lr * p.grad/(p.sqr_avg.sqrt() + self.eps)
 
-# %% ../nbs/220_accel_sgd.ipynb #77352e9c
+# %% ../nbs/220_accel_sgd.ipynb #4c086595
 class Adam(SGD):
     def __init__(self, params, lr, wd=0., beta1=0.9, beta2=0.99, eps=1e-5):
         super().__init__(params, lr=lr, wd=wd)
@@ -103,7 +103,7 @@ class Adam(SGD):
         unbias_sqr_avg = p.sqr_avg / (1 - (self.beta2**(self.i+1)))
         p -= self.lr * unbias_avg / (unbias_sqr_avg + self.eps).sqrt()
 
-# %% ../nbs/220_accel_sgd.ipynb #1748e079
+# %% ../nbs/220_accel_sgd.ipynb #82428882
 def sched_lrs(sched, steps):
     lrs = [sched.get_last_lr()]
     for i in range(steps):
@@ -112,23 +112,23 @@ def sched_lrs(sched, steps):
         lrs.append(sched.get_last_lr())
     plt.plot(lrs)
 
-# %% ../nbs/220_accel_sgd.ipynb #b93cae9b
+# %% ../nbs/220_accel_sgd.ipynb #eecfb18a
 class BaseSchedCB(Callback):
     def __init__(self, sched): self.sched = sched
     def before_fit(self, learn): self.schedo = self.sched(learn.opt)
     def _step(self, learn):
         if learn.training: self.schedo.step()
 
-# %% ../nbs/220_accel_sgd.ipynb #09a4a519
+# %% ../nbs/220_accel_sgd.ipynb #22371f7e
 class BatchSchedCB(BaseSchedCB):
     def after_batch(self, learn): self._step(learn)
 
-# %% ../nbs/220_accel_sgd.ipynb #1b970ed7
+# %% ../nbs/220_accel_sgd.ipynb #3d023ed1
 class HasLearnCB(Callback):
     def before_fit(self, learn): self.learn = learn 
     def after_fit(self, learn): self.learn = None
 
-# %% ../nbs/220_accel_sgd.ipynb #0aedaefe
+# %% ../nbs/220_accel_sgd.ipynb #e5608dd0
 class RecorderCB(Callback):
     def __init__(self, **d): self.d = d
     def before_fit(self, learn):
@@ -146,9 +146,9 @@ class RecorderCB(Callback):
             plt.legend()
             plt.show()
 
-# %% ../nbs/220_accel_sgd.ipynb #e6df0027
+# %% ../nbs/220_accel_sgd.ipynb #893efbec
 def _lr(cb): return cb.pg['lr']
 
-# %% ../nbs/220_accel_sgd.ipynb #b1089bb1
+# %% ../nbs/220_accel_sgd.ipynb #a1f94ad9
 class EpochSchedCB(BaseSchedCB):
     def after_epoch(self, learn): self._step(learn)

@@ -5,7 +5,7 @@
 # %% auto #0
 __all__ = ['def_device', 'apply_kernel', 'conv', 'to_device', 'collate_device']
 
-# %% ../nbs/170_convolutions.ipynb #5b7a46cf
+# %% ../nbs/170_convolutions.ipynb #0120fa29
 import torch
 from torch import nn
 
@@ -15,27 +15,27 @@ from typing import Mapping
 from .training import *
 from .datasets import *
 
-# %% ../nbs/170_convolutions.ipynb #e3bf9a30
+# %% ../nbs/170_convolutions.ipynb #22329b65
 def apply_kernel(row, col, kernel): return (im3[row-1:row+2,col-1:col+2] * kernel).sum()
 
-# %% ../nbs/170_convolutions.ipynb #69161a78
+# %% ../nbs/170_convolutions.ipynb #4c22bac2
 import torch.nn.functional as F
 import torch
 
-# %% ../nbs/170_convolutions.ipynb #c9745e5a
+# %% ../nbs/170_convolutions.ipynb #2c8c9a71
 from itertools import zip_longest
 
-# %% ../nbs/170_convolutions.ipynb #ac5aa4bf
+# %% ../nbs/170_convolutions.ipynb #910d2e74
 def conv(ni, nf, ks=3, stride=2, act=True):
     res = nn.Conv2d(ni, nf, stride=stride, kernel_size=ks, padding=ks//2)
     if act: res = nn.Sequential(res, nn.ReLU())
     return res
 
-# %% ../nbs/170_convolutions.ipynb #f74de46c
+# %% ../nbs/170_convolutions.ipynb #16638f60
 def_device = 'mps' if torch.backends.mps.is_available() else 'cuda' if torch.cuda.is_available() else 'cpu'
 def_device
 
-# %% ../nbs/170_convolutions.ipynb #63b1427f
+# %% ../nbs/170_convolutions.ipynb #8a30dc7b
 def to_device(x, device=def_device):
     if isinstance(x, torch.Tensor): return x.to(device)
     if isinstance(x, Mapping): return {k:v.to(device) for k,v in x.items()}

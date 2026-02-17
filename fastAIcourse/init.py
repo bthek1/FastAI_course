@@ -6,7 +6,7 @@
 __all__ = ['get_model', 'clean_ipython_hist', 'clean_tb', 'clean_mem', 'lin', 'relu', 'init_weights', 'BatchTransformCB',
            'GeneralRelu', 'plot_func', 'conv', 'lsuv_init', 'LayerNorm', 'BatchNorm']
 
-# %% ../nbs/210_initializing.ipynb #d39affb0
+# %% ../nbs/210_initializing.ipynb #81de8883
 import pickle,gzip,math,os,time,shutil,torch,matplotlib as mpl,numpy as np,matplotlib.pyplot as plt
 import sys,gc,traceback
 import fastcore.all as fc
@@ -29,7 +29,7 @@ from .conv import *
 from .learner import *
 from .activations import *
 
-# %% ../nbs/210_initializing.ipynb #3e991d3e
+# %% ../nbs/210_initializing.ipynb #9345a065
 def get_model():
     return nn.Sequential(conv(1 ,8),
                          conv(8 ,16),
@@ -39,7 +39,7 @@ def get_model():
                          nn.Flatten()
                         ).to(def_device)
 
-# %% ../nbs/210_initializing.ipynb #aac6d9d9
+# %% ../nbs/210_initializing.ipynb #cb6c4299
 def clean_ipython_hist():
     # Code in this function mainly copied from IPython source
     if not 'get_ipython' in globals(): return
@@ -54,7 +54,7 @@ def clean_ipython_hist():
     hm.input_hist_raw[:] = [''] * pc
     hm._i = hm._ii = hm._iii = hm._i00 =  ''
 
-# %% ../nbs/210_initializing.ipynb #2350c396
+# %% ../nbs/210_initializing.ipynb #4f983618
 def clean_tb():
     # h/t Piotr Czapla
     if hasattr(sys, 'last_traceback'):
@@ -63,27 +63,27 @@ def clean_tb():
     if hasattr(sys, 'last_type'): delattr(sys, 'last_type')
     if hasattr(sys, 'last_value'): delattr(sys, 'last_value')
 
-# %% ../nbs/210_initializing.ipynb #96d09045
+# %% ../nbs/210_initializing.ipynb #738172b7
 def clean_mem():
     clean_tb()
     clean_ipython_hist()
     gc.collect()
     torch.cuda.empty_cache()
 
-# %% ../nbs/210_initializing.ipynb #debfa104
+# %% ../nbs/210_initializing.ipynb #f08a5a16
 from math import sqrt
 
-# %% ../nbs/210_initializing.ipynb #4140f9a0
+# %% ../nbs/210_initializing.ipynb #e0119db4
 def lin(x, w, b): return x @ w + b
 
-# %% ../nbs/210_initializing.ipynb #bf83417f
+# %% ../nbs/210_initializing.ipynb #eee1fa02
 def relu(x): return x.clamp_min(0.)
 
-# %% ../nbs/210_initializing.ipynb #00a0f75e
+# %% ../nbs/210_initializing.ipynb #fd03733f
 def init_weights(m):
     if isinstance(m, (nn.Conv1d,nn.Conv2d,nn.Conv3d)): init.kaiming_normal_(m.weight)
 
-# %% ../nbs/210_initializing.ipynb #af712481
+# %% ../nbs/210_initializing.ipynb #e7270cdc
 class BatchTransformCB(Callback):
     def __init__(self, tfm, on_train=True, on_val=True): fc.store_attr()
 
@@ -91,7 +91,7 @@ class BatchTransformCB(Callback):
         if (self.on_train and learn.training) or (self.on_val and not learn.training):
             learn.batch = self.tfm(learn.batch)
 
-# %% ../nbs/210_initializing.ipynb #7a0783ff
+# %% ../nbs/210_initializing.ipynb #efe4304d
 class GeneralRelu(nn.Module):
     def __init__(self, leak=None, sub=None, maxv=None):
         super().__init__()
@@ -103,7 +103,7 @@ class GeneralRelu(nn.Module):
         if self.maxv is not None: x.clamp_max_(self.maxv)
         return x
 
-# %% ../nbs/210_initializing.ipynb #153586d4
+# %% ../nbs/210_initializing.ipynb #888f6915
 def plot_func(f, start=-5., end=5., steps=100):
     x = torch.linspace(start, end, steps)
     plt.plot(x, f(x))
@@ -111,23 +111,23 @@ def plot_func(f, start=-5., end=5., steps=100):
     plt.axhline(y=0, color='k', linewidth=0.7)
     plt.axvline(x=0, color='k', linewidth=0.7)
 
-# %% ../nbs/210_initializing.ipynb #1bd2a351
+# %% ../nbs/210_initializing.ipynb #361c9c7d
 def conv(ni, nf, ks=3, stride=2, act=nn.ReLU):
     res = nn.Conv2d(ni, nf, stride=stride, kernel_size=ks, padding=ks//2)
     if act: res = nn.Sequential(res, act())
     return res
 
-# %% ../nbs/210_initializing.ipynb #70d47044
+# %% ../nbs/210_initializing.ipynb #8c349829
 def get_model(act=nn.ReLU, nfs=None):
     if nfs is None: nfs = [1,8,16,32,64]
     layers = [conv(nfs[i], nfs[i+1], act=act) for i in range(len(nfs)-1)]
     return nn.Sequential(*layers, conv(nfs[-1],10, act=None), nn.Flatten()).to(def_device)
 
-# %% ../nbs/210_initializing.ipynb #1e1723ec
+# %% ../nbs/210_initializing.ipynb #51e6f57a
 def init_weights(m, leaky=0.):
     if isinstance(m, (nn.Conv1d,nn.Conv2d,nn.Conv3d)): init.kaiming_normal_(m.weight, a=leaky)
 
-# %% ../nbs/210_initializing.ipynb #c542f781
+# %% ../nbs/210_initializing.ipynb #ace9b1e4
 def _lsuv_stats(hook, mod, inp, outp):
     acts = to_cpu(outp)
     hook.mean = acts.mean()
@@ -141,7 +141,7 @@ def lsuv_init(model, m, m_in, xb):
             m_in.weight.data /= h.std
     h.remove()
 
-# %% ../nbs/210_initializing.ipynb #6ffda09c
+# %% ../nbs/210_initializing.ipynb #2d452753
 class LayerNorm(nn.Module):
     def __init__(self, dummy, eps=1e-5):
         super().__init__()
@@ -155,7 +155,7 @@ class LayerNorm(nn.Module):
         x = (x-m) / ((v+self.eps).sqrt())
         return x*self.mult + self.add
 
-# %% ../nbs/210_initializing.ipynb #5f8f5129
+# %% ../nbs/210_initializing.ipynb #b79f3db1
 def conv(ni, nf, ks=3, stride=2, act=nn.ReLU, norm=None, bias=None):
     if bias is None: bias = not isinstance(norm, (nn.BatchNorm1d,nn.BatchNorm2d,nn.BatchNorm3d))
     layers = [nn.Conv2d(ni, nf, stride=stride, kernel_size=ks, padding=ks//2, bias=bias)]
@@ -163,14 +163,14 @@ def conv(ni, nf, ks=3, stride=2, act=nn.ReLU, norm=None, bias=None):
     if act: layers.append(act())
     return nn.Sequential(*layers)
 
-# %% ../nbs/210_initializing.ipynb #71d64990
+# %% ../nbs/210_initializing.ipynb #6d290027
 def get_model(act=nn.ReLU, nfs=None, norm=None):
     if nfs is None: nfs = [1,8,16,32,64]
     layers = [conv(nfs[i], nfs[i+1], act=act, norm=norm) for i in range(len(nfs)-1)]
     return nn.Sequential(*layers, conv(nfs[-1],10, act=None, norm=False, bias=True),
                          nn.Flatten()).to(def_device)
 
-# %% ../nbs/210_initializing.ipynb #4625a59c
+# %% ../nbs/210_initializing.ipynb #6cf36369
 class BatchNorm(nn.Module):
     def __init__(self, nf, mom=0.1, eps=1e-5):
         super().__init__()

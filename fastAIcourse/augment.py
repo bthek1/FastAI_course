@@ -7,7 +7,7 @@ __all__ = ['get_model', 'GlobalAvgPool', 'get_model2', 'summary', 'get_model3', 
            'capture_preds', 'rand_erase', 'RandErase', 'rand_copy', 'RandCopy', 'Dropout', 'get_dropmodel', 'TTD_CB',
            'transformi']
 
-# %% ../nbs/240_augment.ipynb #86f49f92
+# %% ../nbs/240_augment.ipynb #fd490abf
 import torch,random
 import fastcore.all as fc
 
@@ -22,7 +22,7 @@ from .init import *
 from .sgd import *
 from .resnet import *
 
-# %% ../nbs/240_augment.ipynb #8bbda8b4
+# %% ../nbs/240_augment.ipynb #b0db1ad6
 import pickle,gzip,math,os,time,shutil
 import matplotlib as mpl,numpy as np,matplotlib.pyplot as plt
 from collections.abc import Mapping
@@ -42,18 +42,18 @@ from datasets import load_dataset,load_dataset_builder
 from fastcore.test import test_close
 from torch import distributions
 
-# %% ../nbs/240_augment.ipynb #db306624
+# %% ../nbs/240_augment.ipynb #b0b76f05
 def get_model(act=nn.ReLU, nfs=(16,32,64,128,256,512), norm=nn.BatchNorm2d):
     layers = [ResBlock(1, 16, ks=5, stride=1, act=act, norm=norm)]
     layers += [ResBlock(nfs[i], nfs[i+1], act=act, norm=norm, stride=2) for i in range(len(nfs)-1)]
     layers += [nn.Flatten(), nn.Linear(nfs[-1], 10, bias=False), nn.BatchNorm1d(10)]
     return nn.Sequential(*layers)
 
-# %% ../nbs/240_augment.ipynb #2f8a3868
+# %% ../nbs/240_augment.ipynb #e62a3d48
 class GlobalAvgPool(nn.Module):
     def forward(self, x): return x.mean((-2,-1))
 
-# %% ../nbs/240_augment.ipynb #ad8680d1
+# %% ../nbs/240_augment.ipynb #5584fe2a
 def get_model2(act=nn.ReLU, nfs=(16,32,64,128,256), norm=nn.BatchNorm2d):
     layers = [ResBlock(1, 16, ks=5, stride=1, act=act, norm=norm)]
     layers += [ResBlock(nfs[i], nfs[i+1], act=act, norm=norm, stride=2) for i in range(len(nfs)-1)]
@@ -61,7 +61,7 @@ def get_model2(act=nn.ReLU, nfs=(16,32,64,128,256), norm=nn.BatchNorm2d):
     layers += [nn.Linear(512, 10, bias=False), nn.BatchNorm1d(10)]
     return nn.Sequential(*layers)
 
-# %% ../nbs/240_augment.ipynb #7b0f1289
+# %% ../nbs/240_augment.ipynb #fb96fff7
 def _flops(x, h, w):
     if x.dim()<3: return x.numel()
     if x.dim()==4: return x.numel()*h*w
@@ -85,31 +85,31 @@ def summary(self:Learner):
         return Markdown(res)
     else: print(res)
 
-# %% ../nbs/240_augment.ipynb #5676c65f
+# %% ../nbs/240_augment.ipynb #07fc123e
 def get_model3(act=nn.ReLU, nfs=(16,32,64,128,256), norm=nn.BatchNorm2d):
     layers = [ResBlock(1, 16, ks=5, stride=1, act=act, norm=norm)]
     layers += [ResBlock(nfs[i], nfs[i+1], act=act, norm=norm, stride=2) for i in range(len(nfs)-1)]
     layers += [GlobalAvgPool(), nn.Linear(256, 10, bias=False), nn.BatchNorm1d(10)]
     return nn.Sequential(*layers)
 
-# %% ../nbs/240_augment.ipynb #6cf94ce1
+# %% ../nbs/240_augment.ipynb #2fb695aa
 def get_model4(act=nn.ReLU, nfs=(16,32,64,128,256), norm=nn.BatchNorm2d):
     layers = [conv(1, 16, ks=5, stride=1, act=act, norm=norm)]
     layers += [ResBlock(nfs[i], nfs[i+1], act=act, norm=norm, stride=2) for i in range(len(nfs)-1)]
     layers += [GlobalAvgPool(), nn.Linear(256, 10, bias=False), nn.BatchNorm1d(10)]
     return nn.Sequential(*layers)
 
-# %% ../nbs/240_augment.ipynb #0f5fa6e9
+# %% ../nbs/240_augment.ipynb #702e78be
 from torchvision import transforms
 
-# %% ../nbs/240_augment.ipynb #f62fd2cb
+# %% ../nbs/240_augment.ipynb #11465e65
 @fc.patch
 @fc.delegates(show_images)
 def show_image_batch(self:Learner, max_n=9, cbs=None, **kwargs):
     self.fit(1, cbs=[SingleBatchCB()]+fc.L(cbs))
     show_images(self.batch[0][:max_n], **kwargs)
 
-# %% ../nbs/240_augment.ipynb #5fa5f76f
+# %% ../nbs/240_augment.ipynb #5fbfb0e2
 class CapturePreds(Callback):
     def before_fit(self, learn): self.all_inps,self.all_preds,self.all_targs = [],[],[]
     def after_batch(self, learn):
@@ -119,7 +119,7 @@ class CapturePreds(Callback):
     def after_fit(self, learn):
         self.all_preds,self.all_targs,self.all_inps = map(torch.cat, [self.all_preds,self.all_targs,self.all_inps])
 
-# %% ../nbs/240_augment.ipynb #6804a475
+# %% ../nbs/240_augment.ipynb #da93be6a
 @fc.patch
 def capture_preds(self: Learner, cbs=None, inps=False):
     cp = CapturePreds()
@@ -128,7 +128,7 @@ def capture_preds(self: Learner, cbs=None, inps=False):
     if inps: res = res+(cp.all_inps,)
     return res
 
-# %% ../nbs/240_augment.ipynb #7d4c2186
+# %% ../nbs/240_augment.ipynb #3cfff1ef
 def _rand_erase1(x, pct, xm, xs, mn, mx):
     szx = int(pct*x.shape[-2])
     szy = int(pct*x.shape[-1])
@@ -137,7 +137,7 @@ def _rand_erase1(x, pct, xm, xs, mn, mx):
     init.normal_(x[:,:,stx:stx+szx,sty:sty+szy], mean=xm, std=xs)
     x.clamp_(mn, mx)
 
-# %% ../nbs/240_augment.ipynb #e7321e54
+# %% ../nbs/240_augment.ipynb #05922c33
 def rand_erase(x, pct=0.2, max_num = 4):
     xm,xs,mn,mx = x.mean(),x.std(),x.min(),x.max()
     num = random.randint(0, max_num)
@@ -145,14 +145,14 @@ def rand_erase(x, pct=0.2, max_num = 4):
 #     print(num)
     return x
 
-# %% ../nbs/240_augment.ipynb #1ccfa7a0
+# %% ../nbs/240_augment.ipynb #3d8ab13c
 class RandErase(nn.Module):
     def __init__(self, pct=0.2, max_num=4):
         super().__init__()
         self.pct,self.max_num = pct,max_num
     def forward(self, x): return rand_erase(x, self.pct, self.max_num)
 
-# %% ../nbs/240_augment.ipynb #47e15bc4
+# %% ../nbs/240_augment.ipynb #f08763bf
 def _rand_copy1(x, pct):
     szx = int(pct*x.shape[-2])
     szy = int(pct*x.shape[-1])
@@ -162,21 +162,21 @@ def _rand_copy1(x, pct):
     sty2 = int(random.random()*(1-pct)*x.shape[-1])
     x[:,:,stx1:stx1+szx,sty1:sty1+szy] = x[:,:,stx2:stx2+szx,sty2:sty2+szy]
 
-# %% ../nbs/240_augment.ipynb #b4f2173f
+# %% ../nbs/240_augment.ipynb #f881f87d
 def rand_copy(x, pct=0.2, max_num = 4):
     num = random.randint(0, max_num)
     for i in range(num): _rand_copy1(x, pct)
 #     print(num)
     return x
 
-# %% ../nbs/240_augment.ipynb #4db8c11a
+# %% ../nbs/240_augment.ipynb #5678be25
 class RandCopy(nn.Module):
     def __init__(self, pct=0.2, max_num=4):
         super().__init__()
         self.pct,self.max_num = pct,max_num
     def forward(self, x): return rand_copy(x, self.pct, self.max_num)
 
-# %% ../nbs/240_augment.ipynb #a305acec
+# %% ../nbs/240_augment.ipynb #a2642380
 class Dropout(nn.Module):
     def __init__(self, p=0.1):
         super().__init__()
@@ -187,18 +187,18 @@ class Dropout(nn.Module):
         dist = distributions.binomial.Binomial(tensor(1.0).to(x.device), probs=1-self.p)
         return x * dist.sample(x.size()) * 1/(1-self.p)
 
-# %% ../nbs/240_augment.ipynb #8b0a1aa8
+# %% ../nbs/240_augment.ipynb #0a855778
 def get_dropmodel(act=nn.ReLU, nfs=(16,32,64,128,256,512), norm=nn.BatchNorm2d, drop=0.0):
     layers = [ResBlock(1, 16, ks=5, stride=1, act=act, norm=norm), nn.Dropout2d(drop)]
     layers += [ResBlock(nfs[i], nfs[i+1], act=act, norm=norm, stride=2) for i in range(len(nfs)-1)]
     layers += [nn.Flatten(), Dropout(drop), nn.Linear(nfs[-1], 10, bias=False), nn.BatchNorm1d(10)]
     return nn.Sequential(*layers)
 
-# %% ../nbs/240_augment.ipynb #f700b3e5
+# %% ../nbs/240_augment.ipynb #87506e56
 class TTD_CB(Callback):
     def before_epoch(self, learn):
         learn.model.apply(lambda m: m.train() if isinstance(m, (nn.Dropout,nn.Dropout2d)) else None)
 
-# %% ../nbs/240_augment.ipynb #045a84ed
+# %% ../nbs/240_augment.ipynb #947d151b
 @inplace
 def transformi(b): b[xl] = [(TF.to_tensor(o)*2-1) for o in b[xl]]
