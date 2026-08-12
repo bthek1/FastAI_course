@@ -7,3 +7,8 @@ website:
   description: "fastAIcourse"
   repo-branch: main
   repo-url: "https://github.com/bthek1/fastAIcourse"
+
+format-links:
+  - html
+  - format: commonmark
+    text: Markdown
