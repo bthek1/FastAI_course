@@ -69,6 +69,8 @@ website:
           href: https://bthek1.github.io/Python_Libs/
         - text: "Nbdev Automation"
           href: https://bthek1.github.io/nbdevAuto/
+        - text: "ROS 2"
+          href: https://bthek1.github.io/ROS2_docs/
 
       - text: "Business"
         menu:
