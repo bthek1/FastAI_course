@@ -62,7 +62,7 @@ Part 2 opens by using diffusion models before explaining them.
 |----|----|
 | [Overview](110_Stable_Diffusion_overview.ipynb) | What the pieces are |
 | [Stable Diffusion with Diffusers](111_Stable_Diffusion.ipynb) | Driving it through Hugging Face, including attention slicing to trade speed for memory |
-| [Deep Dive](112_Stable%20Diffusion%20Deep%20Dive.ipynb) | Taking the pipeline apart |
+| [Deep Dive](112_Stable_Diffusion_Deep_Dive.ipynb) | Taking the pipeline apart |
 
 ------------------------------------------------------------------------
 

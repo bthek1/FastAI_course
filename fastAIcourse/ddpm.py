@@ -44,27 +44,27 @@ class DDPMCB(TrainCB):
     order = DeviceCB.order+1
     def __init__(self, n_steps, beta_min, beta_max):
         super().__init__()
-        self.n_steps,self.βmin,self.βmax = n_steps,beta_min,beta_max
+        self.n_steps,self.betamin,self.betamax = n_steps,beta_min,beta_max
         # variance schedule, linearly increased with timestep
-        self.β = torch.linspace(self.βmin, self.βmax, self.n_steps)
-        self.α = 1. - self.β 
-        self.ᾱ = torch.cumprod(self.α, dim=0)
-        self.σ = self.β.sqrt()
+        self.beta = torch.linspace(self.betamin, self.betamax, self.n_steps)
+        self.alpha = 1. - self.beta 
+        self.alphabar = torch.cumprod(self.alpha, dim=0)
+        self.sigma = self.beta.sqrt()
 
     def predict(self, learn): learn.preds = learn.model(*learn.batch[0]).sample
     
     def before_batch(self, learn):
         device = learn.batch[0].device
-        ε = torch.randn(learn.batch[0].shape, device=device)  # noise, x_T
+        eps = torch.randn(learn.batch[0].shape, device=device)  # noise, x_T
         x0 = learn.batch[0] # original images, x_0
-        self.ᾱ = self.ᾱ.to(device)
+        self.alphabar = self.alphabar.to(device)
         n = x0.shape[0]
         # select random timesteps
         t = torch.randint(0, self.n_steps, (n,), device=device, dtype=torch.long)
-        ᾱ_t = self.ᾱ[t].reshape(-1, 1, 1, 1).to(device)
-        xt = ᾱ_t.sqrt()*x0 + (1-ᾱ_t).sqrt()*ε #noisify the image
+        alphabar_t = self.alphabar[t].reshape(-1, 1, 1, 1).to(device)
+        xt = alphabar_t.sqrt()*x0 + (1-alphabar_t).sqrt()*eps #noisify the image
         # input to our model is noisy image and timestep, ground truth is the noise 
-        learn.batch = ((xt, t), ε)
+        learn.batch = ((xt, t), eps)
     
     @torch.no_grad()
     def sample(self, model, sz):
@@ -74,13 +74,13 @@ class DDPMCB(TrainCB):
         for t in reversed(range(self.n_steps)):
             t_batch = torch.full((x_t.shape[0],), t, device=device, dtype=torch.long)
             z = (torch.randn(x_t.shape) if t > 0 else torch.zeros(x_t.shape)).to(device)
-            ᾱ_t1 = self.ᾱ[t-1]  if t > 0 else torch.tensor(1)
-            b̄_t = 1 - self.ᾱ[t]
-            b̄_t1 = 1 - ᾱ_t1
+            alphabar_t1 = self.alphabar[t-1]  if t > 0 else torch.tensor(1)
+            bbar_t = 1 - self.alphabar[t]
+            bbar_t1 = 1 - alphabar_t1
             noise_pred = learn.model(x_t, t_batch).sample
-            x_0_hat = ((x_t - b̄_t.sqrt() * noise_pred)/self.ᾱ[t].sqrt()).clamp(-1,1)
-            x0_coeff = ᾱ_t1.sqrt()*(1-self.α[t])/b̄_t
-            xt_coeff = self.α[t].sqrt()*b̄_t1/b̄_t
-            x_t = x_0_hat*x0_coeff + x_t*xt_coeff + self.σ[t]*z
+            x_0_hat = ((x_t - bbar_t.sqrt() * noise_pred)/self.alphabar[t].sqrt()).clamp(-1,1)
+            x0_coeff = alphabar_t1.sqrt()*(1-self.alpha[t])/bbar_t
+            xt_coeff = self.alpha[t].sqrt()*bbar_t1/bbar_t
+            x_t = x_0_hat*x0_coeff + x_t*xt_coeff + self.sigma[t]*z
             preds.append(x_t.cpu())
         return preds

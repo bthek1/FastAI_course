@@ -30,14 +30,14 @@ from .resnet import *
 from .augment import *
 
 # %% ../nbs/270_DDPM_v2.ipynb #1196c9e8
-def noisify(x0, ᾱ):
+def noisify(x0, alphabar):
     device = x0.device
     n = len(x0)
     t = torch.randint(0, n_steps, (n,), dtype=torch.long)
-    ε = torch.randn(x0.shape, device=device)
-    ᾱ_t = ᾱ[t].reshape(-1, 1, 1, 1).to(device)
-    xt = ᾱ_t.sqrt()*x0 + (1-ᾱ_t).sqrt()*ε
-    return (xt, t.to(device)), ε
+    eps = torch.randn(x0.shape, device=device)
+    alphabar_t = alphabar[t].reshape(-1, 1, 1, 1).to(device)
+    xt = alphabar_t.sqrt()*x0 + (1-alphabar_t).sqrt()*eps
+    return (xt, t.to(device)), eps
 
 # %% ../nbs/270_DDPM_v2.ipynb #1063a003
 from diffusers import UNet2DModel
@@ -51,11 +51,11 @@ def sample(model, sz, alpha, alphabar, sigma, n_steps):
     for t in reversed(range(n_steps)):
         t_batch = torch.full((x_t.shape[0],), t, device=device, dtype=torch.long)
         z = (torch.randn(x_t.shape) if t > 0 else torch.zeros(x_t.shape)).to(device)
-        ᾱ_t1 = alphabar[t-1]  if t > 0 else torch.tensor(1)
-        b̄_t = 1 - alphabar[t]
-        b̄_t1 = 1 - ᾱ_t1
-        x_0_hat = ((x_t - b̄_t.sqrt() * learn.model((x_t, t_batch)))/alphabar[t].sqrt()).clamp(-1,1)
-        x_t = x_0_hat * ᾱ_t1.sqrt()*(1-alpha[t])/b̄_t + x_t * alpha[t].sqrt()*b̄_t1/b̄_t + sigma[t]*z
+        alphabar_t1 = alphabar[t-1]  if t > 0 else torch.tensor(1)
+        bbar_t = 1 - alphabar[t]
+        bbar_t1 = 1 - alphabar_t1
+        x_0_hat = ((x_t - bbar_t.sqrt() * learn.model((x_t, t_batch)))/alphabar[t].sqrt()).clamp(-1,1)
+        x_t = x_0_hat * alphabar_t1.sqrt()*(1-alpha[t])/bbar_t + x_t * alpha[t].sqrt()*bbar_t1/bbar_t + sigma[t]*z
         preds.append(x_t.cpu())
     return preds
 
@@ -66,12 +66,12 @@ class DDPMCB(Callback):
         super().__init__()
         fc.store_attr()
         self.beta = torch.linspace(self.beta_min, self.beta_max, self.n_steps)
-        self.α = 1. - self.beta 
-        self.ᾱ = torch.cumprod(self.α, dim=0)
-        self.σ = self.beta.sqrt()
+        self.alpha = 1. - self.beta 
+        self.alphabar = torch.cumprod(self.alpha, dim=0)
+        self.sigma = self.beta.sqrt()
     
-    def before_batch(self, learn): learn.batch = noisify(learn.batch[0], self.ᾱ)
-    def sample(self, model, sz): return sample(model, sz, self.α, self.ᾱ, self.σ, self.n_steps)
+    def before_batch(self, learn): learn.batch = noisify(learn.batch[0], self.alphabar)
+    def sample(self, model, sz): return sample(model, sz, self.alpha, self.alphabar, self.sigma, self.n_steps)
 
 # %% ../nbs/270_DDPM_v2.ipynb #9a42927a
 class UNet(UNet2DModel):
@@ -128,14 +128,14 @@ class AccelerateCB(TrainCB):
     def backward(self, learn): self.acc.backward(learn.loss)
 
 # %% ../nbs/270_DDPM_v2.ipynb #dde9d6a7
-def noisify(x0, ᾱ):
+def noisify(x0, alphabar):
     device = x0.device
     n = len(x0)
     t = torch.randint(0, n_steps, (n,), dtype=torch.long)
-    ε = torch.randn(x0.shape, device=device)
-    ᾱ_t = ᾱ[t].reshape(-1, 1, 1, 1).to(device)
-    xt = ᾱ_t.sqrt()*x0 + (1-ᾱ_t).sqrt()*ε
-    return xt, t.to(device), ε
+    eps = torch.randn(x0.shape, device=device)
+    alphabar_t = alphabar[t].reshape(-1, 1, 1, 1).to(device)
+    xt = alphabar_t.sqrt()*x0 + (1-alphabar_t).sqrt()*eps
+    return xt, t.to(device), eps
 
 # %% ../nbs/270_DDPM_v2.ipynb #39f54712
 class DDPMCB2(Callback):
