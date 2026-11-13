@@ -31,4 +31,5 @@ version = {attr = "fastAIcourse.__version__"}
 include = ["fastAIcourse"]
 
 [tool.nbdev]
+custom_sidebar = true
 jupyter_hooks = true
