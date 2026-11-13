@@ -1,0 +1,7 @@
+# fastAIcourse
+
+> fastAIcourse
+
+## Pages
+
+- [fast.ai Course](https://bthek1.github.io/fastAIcourse/index.llms.md)
